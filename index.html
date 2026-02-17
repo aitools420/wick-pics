@@ -170,6 +170,109 @@
     <p>Built by an autonomous agent. Probably.</p>
   </footer>
 
+  <section style="padding: 40px 20px; text-align: center;">
+    <h2 style="font-family: 'Bungee Shade', cursive; color: lime; margin-bottom: 20px; font-size: clamp(1.5rem, 5vw, 2.5rem);">
+      🔗 PFP Ring Generator
+    </h2>
+    <p style="color: #ccc; margin-bottom: 20px; font-size: 0.8rem; line-height: 1.6;">
+      Upload your profile picture and we'll add a Green Wick themed ring around it.
+    </p>
+    
+    <input type="file" id="pfpInput" accept="image/*" style="margin-bottom: 20px; display: block; margin: 0 auto 20px auto; font-family: 'Press Start 2P', cursive; color: lime;">
+    
+    <div id="pfpPreview" style="display: none; max-width: 300px; margin: 0 auto 20px auto; position: relative;">
+      <canvas id="ringCanvas"></canvas>
+    </div>
+    
+    <button id="downloadBtn" style="display: none; background: lime; color: #000; border: 4px solid #fff; padding: 12px 24px; font-family: 'Press Start 2P', cursive; cursor: pointer; box-shadow: 8px 8px 0 #ff00ff; font-size: 0.7rem;">
+      Download Ringed PFP
+    </button>
+  </section>
+
+  <script>
+    document.getElementById('pfpInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.getElementById('ringCanvas');
+          const ctx = canvas.getContext('2d');
+          
+          // Limit display size
+          const maxSize = 300;
+          let width = img.width;
+          let height = img.height;
+          
+          if (width > maxSize || height > maxSize) {
+            const ratio = Math.min(maxSize / width, maxSize / height);
+            width *= ratio;
+            height *= ratio;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          
+          // Draw image
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Draw Green Wick themed ring
+          const ringThickness = 10;
+          const centerX = width / 2;
+          const centerY = height / 2;
+          const radius = Math.min(width, height) / 2 - ringThickness / 2;
+          
+          // Outer magenta glow
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, radius + ringThickness/2 + 3, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(255, 0, 255, 0.5)';
+          ctx.lineWidth = 6;
+          ctx.stroke();
+          
+          // Main lime ring
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, radius + ringThickness/2, 0, Math.PI * 2);
+          ctx.strokeStyle = '#00ff00';
+          ctx.lineWidth = ringThickness;
+          ctx.stroke();
+          
+          // Cyan inner glow
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, radius - ringThickness/2, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(0, 255, 255, 0.3)';
+          ctx.lineWidth = 4;
+          ctx.stroke();
+          
+          // Green sparkles
+          ctx.fillStyle = '#00ff00';
+          for (let i = 0; i < 12; i++) {
+            const angle = (i / 12) * Math.PI * 2;
+            const x = centerX + Math.cos(angle) * (radius + ringThickness + 5);
+            const y = centerY + Math.sin(angle) * (radius + ringThickness + 5);
+            ctx.beginPath();
+            ctx.arc(x, y, 3, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          
+          document.getElementById('pfpPreview').style.display = 'block';
+          document.getElementById('downloadBtn').style.display = 'inline-block';
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('downloadBtn').addEventListener('click', function() {
+      const canvas = document.getElementById('ringCanvas');
+      const link = document.createElement('a');
+      link.download = 'green-wick-pfp-ring.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+  </script>
+
   <script>
     // Live $WICK price ticker from DexScreener
     async function updatePrice() {
