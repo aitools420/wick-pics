@@ -70,10 +70,30 @@
     .preview-area.show { display: block; }
     .canvas-wrap {
       display: inline-block;
-      border-radius: 50%;
       box-shadow: 0 0 40px rgba(0,255,0,0.15), 0 0 80px rgba(0,255,0,0.05);
     }
-    canvas { display: block; border-radius: 50%; }
+    .canvas-wrap.circle { border-radius: 50%; }
+    canvas { display: block; }
+    canvas.circle { border-radius: 50%; }
+
+    /* Shape toggle */
+    .shape-toggle {
+      display: flex;
+      gap: 6px;
+    }
+    .shape-btn {
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: transparent;
+      color: #888;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .shape-btn:hover { border-color: rgba(255,255,255,0.25); color: #ccc; }
+    .shape-btn.active { border-color: #0f0; color: #0f0; background: rgba(0,255,0,0.08); }
 
     /* Controls */
     .controls {
@@ -191,13 +211,20 @@
         <input type="range" id="zoom" min="80" max="150" value="100">
       </div>
       <div class="control-row">
+        <span class="control-label">Shape</span>
+        <div class="shape-toggle" id="shapeToggle">
+          <button class="shape-btn active" data-shape="circle">Circle</button>
+          <button class="shape-btn" data-shape="hexagon">Hexagon</button>
+        </div>
+      </div>
+      <div class="control-row">
         <span class="control-label">Style</span>
         <div class="style-pills" id="stylePills">
-          <div class="style-pill active" data-style="wick" style="background: conic-gradient(#0f0, #0ff, #f0f, #0f0);" title="Green Wick"></div>
+          <div class="style-pill active" data-style="wick" style="background: conic-gradient(#0a5c1a, #10b840, #1a4d2e, #22c55e, #0a5c1a);" title="Green Wick"></div>
           <div class="style-pill" data-style="fire" style="background: conic-gradient(#f80, #f00, #ff0, #f80);" title="Fire"></div>
           <div class="style-pill" data-style="ice" style="background: conic-gradient(#0af, #08f, #0ff, #0af);" title="Ice"></div>
-          <div class="style-pill" data-style="gold" style="background: conic-gradient(#fc0, #fa0, #ff0, #fc0);" title="Gold"></div>
-          <div class="style-pill" data-style="purple" style="background: conic-gradient(#a0f, #60f, #f0f, #a0f);" title="Purple"></div>
+          <div class="style-pill" data-style="tang" style="background: conic-gradient(#fc0, #fa0, #ff0, #fc0);" title="Tang Gang"></div>
+          <div class="style-pill" data-style="pulse" style="background: conic-gradient(#7B3FE4, #00D4AA, #9945FF, #00FF48, #7B3FE4);" title="PulseChain"></div>
         </div>
       </div>
     </div>
@@ -217,16 +244,29 @@ const ctx = canvas.getContext('2d');
 
 let sourceImg = null;
 let currentStyle = 'wick';
+let currentShape = 'circle';
 let ringPct = 5;
 let zoomPct = 100;
 
 const STYLES = {
-  wick:   [{stop:0,c:'#00ff00'},{stop:0.25,c:'#00ffff'},{stop:0.5,c:'#ff00ff'},{stop:0.75,c:'#00ffcc'},{stop:1,c:'#00ff00'}],
+  wick:   [{stop:0,c:'#0a5c1a'},{stop:0.2,c:'#10b840'},{stop:0.4,c:'#1a4d2e'},{stop:0.6,c:'#22c55e'},{stop:0.8,c:'#15803d'},{stop:1,c:'#0a5c1a'}],
   fire:   [{stop:0,c:'#ff8800'},{stop:0.25,c:'#ff0000'},{stop:0.5,c:'#ffff00'},{stop:0.75,c:'#ff4400'},{stop:1,c:'#ff8800'}],
   ice:    [{stop:0,c:'#00aaff'},{stop:0.25,c:'#0088ff'},{stop:0.5,c:'#00ffff'},{stop:0.75,c:'#44aaff'},{stop:1,c:'#00aaff'}],
-  gold:   [{stop:0,c:'#ffcc00'},{stop:0.25,c:'#ffaa00'},{stop:0.5,c:'#ffee44'},{stop:0.75,c:'#ff9900'},{stop:1,c:'#ffcc00'}],
-  purple: [{stop:0,c:'#aa00ff'},{stop:0.25,c:'#6600ff'},{stop:0.5,c:'#ff00ff'},{stop:0.75,c:'#8800ff'},{stop:1,c:'#aa00ff'}],
+  tang:   [{stop:0,c:'#ffcc00'},{stop:0.25,c:'#ffaa00'},{stop:0.5,c:'#ffee44'},{stop:0.75,c:'#ff9900'},{stop:1,c:'#ffcc00'}],
+  pulse:  [{stop:0,c:'#7B3FE4'},{stop:0.25,c:'#00D4AA'},{stop:0.5,c:'#9945FF'},{stop:0.75,c:'#00FF48'},{stop:1,c:'#7B3FE4'}],
 };
+
+function hexPath(ctx, cx, cy, r) {
+  ctx.beginPath();
+  for (let i = 0; i < 6; i++) {
+    const angle = (Math.PI / 3) * i - Math.PI / 2;
+    const x = cx + r * Math.cos(angle);
+    const y = cy + r * Math.sin(angle);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+}
 
 function render(outputSize) {
   if (!sourceImg) return;
@@ -235,47 +275,64 @@ function render(outputSize) {
   canvas.height = sz;
   ctx.clearRect(0, 0, sz, sz);
 
+  const isHex = currentShape === 'hexagon';
   const ringW = sz * (ringPct / 100);
   const center = sz / 2;
   const outerR = sz / 2;
   const innerR = outerR - ringW;
 
+  // Update preview shape classes
+  if (!outputSize) {
+    const wrap = document.querySelector('.canvas-wrap');
+    wrap.classList.toggle('circle', !isHex);
+    canvas.classList.toggle('circle', !isHex);
+  }
+
   // Draw gradient ring
   const grad = ctx.createConicGradient(0, center, center);
   STYLES[currentStyle].forEach(s => grad.addColorStop(s.stop, s.c));
-  ctx.beginPath();
-  ctx.arc(center, center, outerR, 0, Math.PI * 2);
-  ctx.arc(center, center, innerR, 0, Math.PI * 2, true);
-  ctx.fillStyle = grad;
-  ctx.fill();
 
-  // Outer glow
-  const glowGrad = ctx.createRadialGradient(center, center, innerR, center, center, outerR + 4);
-  const baseColor = STYLES[currentStyle][0].c;
-  glowGrad.addColorStop(0, 'transparent');
-  glowGrad.addColorStop(0.5, baseColor + '15');
-  glowGrad.addColorStop(1, 'transparent');
-  ctx.beginPath();
-  ctx.arc(center, center, outerR + 4, 0, Math.PI * 2);
-  ctx.fillStyle = glowGrad;
-  ctx.fill();
+  if (isHex) {
+    hexPath(ctx, center, center, outerR);
+    ctx.save();
+    ctx.clip();
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, sz, sz);
+    ctx.restore();
+    // Cut out inner hex
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    hexPath(ctx, center, center, innerR);
+    ctx.fill();
+    ctx.restore();
+  } else {
+    ctx.beginPath();
+    ctx.arc(center, center, outerR, 0, Math.PI * 2);
+    ctx.arc(center, center, innerR, 0, Math.PI * 2, true);
+    ctx.fillStyle = grad;
+    ctx.fill();
+  }
 
-  // Clip circle for image
+  // Clip inner shape for image
   ctx.save();
-  ctx.beginPath();
-  ctx.arc(center, center, innerR - 1, 0, Math.PI * 2);
+  if (isHex) {
+    hexPath(ctx, center, center, innerR - 1);
+  } else {
+    ctx.beginPath();
+    ctx.arc(center, center, innerR - 1, 0, Math.PI * 2);
+  }
   ctx.clip();
 
-  // Draw image centered, covering the circle, with zoom
+  // Draw image centered, cover-fit with zoom
   const scale = zoomPct / 100;
   const imgAspect = sourceImg.width / sourceImg.height;
-  const circleD = innerR * 2;
+  const fitD = innerR * 2;
   let drawW, drawH;
   if (imgAspect > 1) {
-    drawH = circleD * scale;
+    drawH = fitD * scale;
     drawW = drawH * imgAspect;
   } else {
-    drawW = circleD * scale;
+    drawW = fitD * scale;
     drawH = drawW / imgAspect;
   }
   ctx.drawImage(sourceImg, center - drawW/2, center - drawH/2, drawW, drawH);
@@ -322,6 +379,16 @@ document.getElementById('thickness').addEventListener('input', e => {
 document.getElementById('zoom').addEventListener('input', e => {
   zoomPct = parseInt(e.target.value);
   document.getElementById('zoomVal').textContent = zoomPct + '%';
+  render();
+});
+
+// Shape toggle
+document.getElementById('shapeToggle').addEventListener('click', e => {
+  const btn = e.target.closest('.shape-btn');
+  if (!btn) return;
+  document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentShape = btn.dataset.shape;
   render();
 });
 
