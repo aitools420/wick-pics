@@ -610,7 +610,7 @@ document.getElementById('resetBtn').addEventListener('click', () => {
 // ── Community Suggestions (GitHub Issues) ──
 const REPO = 'aitools420/wick-pics';
 const LABEL = 'pfp-idea';
-const WORKER_URL = ''; // Cloudflare Worker endpoint — wire up after deploy
+const WORKER_URL = 'https://pfp-suggestions.trevorgdhawg.workers.dev';
 
 function timeAgo(dateStr) {
   const s = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
