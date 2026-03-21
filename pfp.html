@@ -116,6 +116,18 @@
     .control-row:last-child { margin-bottom: 0; }
     .control-label { color: #999; font-size: 0.8rem; }
     .control-label span { color: #ccc; font-weight: 600; }
+    .zoom-preset-btn {
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: transparent;
+      color: #aaa;
+      font-size: 0.7rem;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+    }
+    .zoom-preset-btn:hover { border-color: #0f0; color: #0f0; }
 
     input[type="range"] {
       -webkit-appearance: none;
@@ -303,7 +315,11 @@
       </div>
       <div class="control-row">
         <span class="control-label">Zoom <span id="zoomVal">100%</span></span>
-        <input type="range" id="zoom" min="80" max="150" value="100">
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input type="range" id="zoom" min="80" max="150" value="100" style="flex:1;">
+          <button class="zoom-preset-btn" id="zoomReset">Reset</button>
+          <button class="zoom-preset-btn" id="zoomMax">MAX</button>
+        </div>
       </div>
       <div class="control-row">
         <span class="control-label">Shape</span>
@@ -529,6 +545,25 @@ document.getElementById('thickness').addEventListener('input', e => {
 });
 document.getElementById('zoom').addEventListener('input', e => {
   zoomPct = parseInt(e.target.value);
+  document.getElementById('zoomVal').textContent = zoomPct + '%';
+  render();
+});
+document.getElementById('zoomReset').addEventListener('click', () => {
+  zoomPct = 100; panX = 0; panY = 0;
+  document.getElementById('zoom').value = 100;
+  document.getElementById('zoomVal').textContent = '100%';
+  render();
+});
+document.getElementById('zoomMax').addEventListener('click', () => {
+  if (!sourceImg) return;
+  const innerR = (DISPLAY / 2) * (1 - ringPct / 100);
+  const imgAspect = sourceImg.width / sourceImg.height;
+  const absX = Math.abs(panX);
+  const absY = Math.abs(panY);
+  const zX = 100 * (innerR + absX) / (innerR * Math.max(1, imgAspect));
+  const zY = 100 * (innerR + absY) / (innerR * Math.max(1, 1 / imgAspect));
+  zoomPct = Math.min(150, Math.max(100, Math.ceil(Math.max(zX, zY))));
+  document.getElementById('zoom').value = zoomPct;
   document.getElementById('zoomVal').textContent = zoomPct + '%';
   render();
 });
