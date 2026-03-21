@@ -318,7 +318,7 @@
         <div style="display:flex;gap:6px;align-items:center;">
           <input type="range" id="zoom" min="80" max="150" value="100" style="flex:1;">
           <button class="zoom-preset-btn" id="zoomReset">Reset</button>
-          <button class="zoom-preset-btn" id="zoomMax">MAX</button>
+          <button class="zoom-preset-btn" id="zoomMax">No Gaps</button>
         </div>
       </div>
       <div class="control-row">
@@ -558,13 +558,36 @@ document.getElementById('zoomMax').addEventListener('click', () => {
   if (!sourceImg) return;
   const innerR = (DISPLAY / 2) * (1 - ringPct / 100);
   const imgAspect = sourceImg.width / sourceImg.height;
-  const absX = Math.abs(panX);
-  const absY = Math.abs(panY);
-  const zX = 100 * (innerR + absX) / (innerR * Math.max(1, imgAspect));
-  const zY = 100 * (innerR + absY) / (innerR * Math.max(1, 1 / imgAspect));
-  zoomPct = Math.min(150, Math.max(100, Math.ceil(Math.max(zX, zY))));
-  document.getElementById('zoom').value = zoomPct;
-  document.getElementById('zoomVal').textContent = zoomPct + '%';
+  const fitD = innerR * 2;
+
+  function margins(z) {
+    let dw, dh;
+    if (imgAspect > 1) {
+      dh = fitD * z / 100; dw = dh * imgAspect;
+    } else {
+      dw = fitD * z / 100; dh = dw / imgAspect;
+    }
+    return { mw: dw / 2 - innerR, mh: dh / 2 - innerR };
+  }
+
+  let { mw, mh } = margins(zoomPct);
+
+  // Already gap-free — do nothing
+  if (mw >= Math.abs(panX) && mh >= Math.abs(panY)) return;
+
+  if (mw >= 0 && mh >= 0) {
+    // Zoom adequate, just clamp pan
+    panX = Math.max(-mw, Math.min(mw, panX));
+    panY = Math.max(-mh, Math.min(mh, panY));
+  } else {
+    // Must zoom to at least 100, then clamp pan
+    zoomPct = 100;
+    const nm = margins(100);
+    panX = Math.max(-nm.mw, Math.min(nm.mw, panX));
+    panY = Math.max(-nm.mh, Math.min(nm.mh, panY));
+    document.getElementById('zoom').value = zoomPct;
+    document.getElementById('zoomVal').textContent = zoomPct + '%';
+  }
   render();
 });
 
