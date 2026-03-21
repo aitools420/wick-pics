@@ -316,10 +316,14 @@
             <svg width="14" height="14" viewBox="0 0 14 14"><polygon points="3.5,0.5 10.5,0.5 13.5,7 10.5,13.5 3.5,13.5 0.5,7" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
             Hexagon
           </button>
+          <button class="shape-btn" data-shape="square">
+            <svg width="14" height="14" viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+            Square
+          </button>
         </div>
       </div>
       <div class="control-row">
-        <span class="control-label">Style</span>
+        <span class="control-label">Community</span>
         <div class="style-pills" id="stylePills">
           <div class="style-pill active" data-style="wick" style="background: conic-gradient(#0a5c1a, #10b840, #1a4d2e, #22c55e, #0a5c1a);" title="Green Wick"></div>
           <div class="style-pill" data-style="fire" style="background: conic-gradient(#f80, #f00, #ff0, #f80);" title="Fire"></div>
@@ -392,20 +396,26 @@ function render(outputSize) {
   canvas.height = sz;
   ctx.clearRect(0, 0, sz, sz);
 
-  const isHex = currentShape === 'hexagon';
+  const shape = currentShape;
   const ringW = sz * (ringPct / 100);
   const center = sz / 2;
   const outerR = sz / 2;
   const innerR = outerR - ringW;
+  const sqRad = sz * 0.06; // corner radius for square shape
 
   // Update preview shape clipping
   if (!outputSize) {
     const wrap = document.querySelector('.canvas-wrap');
-    if (isHex) {
+    if (shape === 'hexagon') {
       wrap.style.borderRadius = '0';
       wrap.style.clipPath = 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)';
       canvas.style.borderRadius = '0';
       canvas.style.clipPath = 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)';
+    } else if (shape === 'square') {
+      wrap.style.borderRadius = '12%';
+      wrap.style.clipPath = 'none';
+      canvas.style.borderRadius = '12%';
+      canvas.style.clipPath = 'none';
     } else {
       wrap.style.borderRadius = '50%';
       wrap.style.clipPath = 'none';
@@ -418,17 +428,27 @@ function render(outputSize) {
   const grad = ctx.createConicGradient(0, center, center);
   STYLES[currentStyle].forEach(s => grad.addColorStop(s.stop, s.c));
 
-  if (isHex) {
+  if (shape === 'hexagon') {
     hexPath(ctx, center, center, outerR);
     ctx.save();
     ctx.clip();
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, sz, sz);
     ctx.restore();
-    // Cut out inner hex
     ctx.save();
     ctx.globalCompositeOperation = 'destination-out';
     hexPath(ctx, center, center, innerR);
+    ctx.fill();
+    ctx.restore();
+  } else if (shape === 'square') {
+    ctx.beginPath();
+    ctx.roundRect(0, 0, sz, sz, sqRad);
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.roundRect(ringW, ringW, sz - ringW * 2, sz - ringW * 2, Math.max(0, sqRad - ringW * 0.5));
     ctx.fill();
     ctx.restore();
   } else {
@@ -441,8 +461,11 @@ function render(outputSize) {
 
   // Clip inner shape for image
   ctx.save();
-  if (isHex) {
+  if (shape === 'hexagon') {
     hexPath(ctx, center, center, innerR - 1);
+  } else if (shape === 'square') {
+    ctx.beginPath();
+    ctx.roundRect(ringW + 1, ringW + 1, sz - (ringW + 1) * 2, sz - (ringW + 1) * 2, Math.max(0, sqRad - ringW * 0.5));
   } else {
     ctx.beginPath();
     ctx.arc(center, center, innerR - 1, 0, Math.PI * 2);
