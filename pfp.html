@@ -620,19 +620,28 @@ function timeAgo(dateStr) {
   return Math.floor(s / 86400) + 'd ago';
 }
 
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
 function renderFeed(issues) {
   const feed = document.getElementById('suggestionFeed');
   if (!issues.length) { feed.innerHTML = '<div class="feed-loading">No ideas yet — be the first!</div>'; return; }
   feed.innerHTML = issues.map(issue => {
-    const aiComment = issue._aiReply || '';
+    const user = esc(issue.user.login);
+    const avatar = esc(issue.user.avatar_url);
+    const title = esc(issue.title);
+    const aiComment = issue._aiReply ? esc(issue._aiReply) : '';
     return `<div class="feed-item">
-      <img class="feed-avatar" src="${issue.user.avatar_url}" alt="" width="28" height="28">
+      <img class="feed-avatar" src="${avatar}" alt="" width="28" height="28">
       <div class="feed-body">
         <div class="feed-meta">
-          <span class="feed-user">${issue.user.login}</span>
+          <span class="feed-user">${user}</span>
           <span class="feed-date">${timeAgo(issue.created_at)}</span>
         </div>
-        <div class="feed-text">${issue.title}</div>
+        <div class="feed-text">${title}</div>
         ${aiComment ? `<span class="feed-ai-badge">AI Response</span><div class="feed-ai-text">${aiComment}</div>` : ''}
       </div>
     </div>`;
