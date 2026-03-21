@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>PFP Ring Generator | WICK.PICS</title>
+  <title>ULTIMATE COMMUNITY PFP GENERATOR | WICK.PICS</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bungee+Shade&display=swap" rel="stylesheet">
   <link rel="icon" href="./favicon.ico" type="image/x-icon">
@@ -81,6 +81,9 @@
       gap: 6px;
     }
     .shape-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
       padding: 5px 12px;
       border-radius: 6px;
       border: 1px solid rgba(255,255,255,0.1);
@@ -174,6 +177,99 @@
       border: 1px solid rgba(255,255,255,0.1);
     }
     .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+
+    /* Suggestion box */
+    .suggestion-box {
+      margin-top: 48px;
+      padding: 24px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+    }
+    .suggestion-box h2 {
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #ccc;
+      margin-bottom: 4px;
+    }
+    .suggestion-subtitle {
+      color: #666;
+      font-size: 0.8rem;
+      margin-bottom: 16px;
+    }
+    .suggestion-feed {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .suggestion-feed:empty { display: none; }
+    .feed-item {
+      display: flex;
+      gap: 10px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 8px;
+      font-size: 0.8rem;
+    }
+    .feed-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .feed-body { flex: 1; min-width: 0; }
+    .feed-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .feed-user { color: #aaa; font-weight: 600; }
+    .feed-date { color: #555; font-size: 0.7rem; }
+    .feed-text { color: #999; line-height: 1.4; word-break: break-word; }
+    .feed-ai-badge {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(0,255,0,0.1);
+      color: #0f0;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    .feed-ai-text { color: #0f0; font-size: 0.75rem; margin-top: 4px; }
+    .suggestion-box textarea {
+      width: 100%;
+      min-height: 60px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+      color: #ddd;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      resize: vertical;
+    }
+    .suggestion-box textarea:focus {
+      outline: none;
+      border-color: rgba(0,255,0,0.4);
+    }
+    .suggestion-box .btn { margin-top: 10px; width: 100%; }
+    .suggestion-status {
+      text-align: center;
+      font-size: 0.75rem;
+      color: #666;
+      margin-top: 8px;
+    }
+    .feed-loading {
+      text-align: center;
+      color: #555;
+      font-size: 0.75rem;
+      padding: 12px;
+    }
   </style>
 </head>
 <body>
@@ -181,8 +277,8 @@
   <a href="/" class="back">&larr; wick.pics</a>
 
   <div class="container">
-    <h1>PFP Ring</h1>
-    <p class="subtitle">Circle crop + gradient ring, ready for any platform</p>
+    <h1>ULTIMATE COMMUNITY PFP GENERATOR</h1>
+    <p class="subtitle">Community-powered ring generator &mdash; suggest new styles below</p>
 
     <!-- Drop Zone -->
     <div class="dropzone" id="dropzone">
@@ -212,8 +308,14 @@
       <div class="control-row">
         <span class="control-label">Shape</span>
         <div class="shape-toggle" id="shapeToggle">
-          <button class="shape-btn active" data-shape="circle">Circle</button>
-          <button class="shape-btn" data-shape="hexagon">Hexagon</button>
+          <button class="shape-btn active" data-shape="circle">
+            <svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+            Circle
+          </button>
+          <button class="shape-btn" data-shape="hexagon">
+            <svg width="14" height="14" viewBox="0 0 14 14"><polygon points="3.5,0.5 10.5,0.5 13.5,7 10.5,13.5 3.5,13.5 0.5,7" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+            Hexagon
+          </button>
         </div>
       </div>
       <div class="control-row">
@@ -222,8 +324,9 @@
           <div class="style-pill active" data-style="wick" style="background: conic-gradient(#0a5c1a, #10b840, #1a4d2e, #22c55e, #0a5c1a);" title="Green Wick"></div>
           <div class="style-pill" data-style="fire" style="background: conic-gradient(#f80, #f00, #ff0, #f80);" title="Fire"></div>
           <div class="style-pill" data-style="ice" style="background: conic-gradient(#0af, #08f, #0ff, #0af);" title="Ice"></div>
-          <div class="style-pill" data-style="tang" style="background: conic-gradient(#fc0, #fa0, #ff0, #fc0);" title="Tang Gang"></div>
-          <div class="style-pill" data-style="pulse" style="background: conic-gradient(#7B3FE4, #00D4AA, #9945FF, #00FF48, #7B3FE4);" title="PulseChain"></div>
+          <div class="style-pill" data-style="tang" style="background: conic-gradient(#FF6B00, #FF8C00, #FFA500, #FF4500, #FF6B00);" title="Tang Gang"></div>
+          <div class="style-pill" data-style="pulse" style="background: conic-gradient(#00A8FF, #0055FF, #5500FF, #9933FF, #00A8FF);" title="PulseChain"></div>
+          <div class="style-pill" data-style="hex" style="background: conic-gradient(#FF00FF, #FF0033, #FF6600, #FFCC00, #FF00FF);" title="HEX"></div>
         </div>
       </div>
     </div>
@@ -232,6 +335,18 @@
     <div class="actions" id="actions">
       <button class="btn btn-secondary" id="resetBtn">Change Image</button>
       <button class="btn btn-primary" id="downloadBtn">Download PFP</button>
+    </div>
+
+    <!-- Community Suggestions -->
+    <div class="suggestion-box" id="suggestionBox">
+      <h2>Community Ideas</h2>
+      <p class="suggestion-subtitle">Suggest new styles, shapes, or features &mdash; our AI reads every one</p>
+      <div class="suggestion-feed" id="suggestionFeed">
+        <div class="feed-loading">Loading suggestions&hellip;</div>
+      </div>
+      <textarea id="suggestionText" placeholder="Your idea..." maxlength="500"></textarea>
+      <button class="btn btn-primary" id="submitIdea">Submit Idea</button>
+      <div class="suggestion-status" id="suggestionStatus"></div>
     </div>
   </div>
 
@@ -253,8 +368,9 @@ const STYLES = {
   wick:   [{stop:0,c:'#0a5c1a'},{stop:0.2,c:'#10b840'},{stop:0.4,c:'#1a4d2e'},{stop:0.6,c:'#22c55e'},{stop:0.8,c:'#15803d'},{stop:1,c:'#0a5c1a'}],
   fire:   [{stop:0,c:'#ff8800'},{stop:0.25,c:'#ff0000'},{stop:0.5,c:'#ffff00'},{stop:0.75,c:'#ff4400'},{stop:1,c:'#ff8800'}],
   ice:    [{stop:0,c:'#00aaff'},{stop:0.25,c:'#0088ff'},{stop:0.5,c:'#00ffff'},{stop:0.75,c:'#44aaff'},{stop:1,c:'#00aaff'}],
-  tang:   [{stop:0,c:'#ffcc00'},{stop:0.25,c:'#ffaa00'},{stop:0.5,c:'#ffee44'},{stop:0.75,c:'#ff9900'},{stop:1,c:'#ffcc00'}],
-  pulse:  [{stop:0,c:'#7B3FE4'},{stop:0.25,c:'#00D4AA'},{stop:0.5,c:'#9945FF'},{stop:0.75,c:'#00FF48'},{stop:1,c:'#7B3FE4'}],
+  tang:   [{stop:0,c:'#FF6B00'},{stop:0.25,c:'#FF8C00'},{stop:0.5,c:'#FFA500'},{stop:0.75,c:'#FF4500'},{stop:1,c:'#FF6B00'}],
+  pulse:  [{stop:0,c:'#00A8FF'},{stop:0.25,c:'#0055FF'},{stop:0.5,c:'#5500FF'},{stop:0.75,c:'#9933FF'},{stop:1,c:'#00A8FF'}],
+  hex:    [{stop:0,c:'#FF00FF'},{stop:0.25,c:'#FF0033'},{stop:0.5,c:'#FF6600'},{stop:0.75,c:'#FFCC00'},{stop:1,c:'#FF00FF'}],
 };
 
 function hexPath(ctx, cx, cy, r) {
@@ -467,6 +583,82 @@ document.getElementById('resetBtn').addEventListener('click', () => {
   document.getElementById('actions').classList.remove('show');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 });
+
+// ── Community Suggestions (GitHub Issues) ──
+const REPO = 'aitools420/wick-pics';
+const LABEL = 'pfp-idea';
+const WORKER_URL = ''; // Cloudflare Worker endpoint — wire up after deploy
+
+function timeAgo(dateStr) {
+  const s = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return Math.floor(s / 60) + 'm ago';
+  if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+  return Math.floor(s / 86400) + 'd ago';
+}
+
+function renderFeed(issues) {
+  const feed = document.getElementById('suggestionFeed');
+  if (!issues.length) { feed.innerHTML = '<div class="feed-loading">No ideas yet — be the first!</div>'; return; }
+  feed.innerHTML = issues.map(issue => {
+    const aiComment = issue._aiReply || '';
+    return `<div class="feed-item">
+      <img class="feed-avatar" src="${issue.user.avatar_url}" alt="" width="28" height="28">
+      <div class="feed-body">
+        <div class="feed-meta">
+          <span class="feed-user">${issue.user.login}</span>
+          <span class="feed-date">${timeAgo(issue.created_at)}</span>
+        </div>
+        <div class="feed-text">${issue.title}</div>
+        ${aiComment ? `<span class="feed-ai-badge">AI Response</span><div class="feed-ai-text">${aiComment}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function loadSuggestions() {
+  try {
+    const res = await fetch(`https://api.github.com/repos/${REPO}/issues?labels=${LABEL}&state=open&per_page=5`);
+    if (!res.ok) throw new Error(res.status);
+    const issues = await res.json();
+    // Check for AI comments on each issue
+    await Promise.all(issues.map(async issue => {
+      try {
+        const cRes = await fetch(issue.comments_url);
+        if (!cRes.ok) return;
+        const comments = await cRes.json();
+        const ai = comments.find(c => c.user.login.includes('bot') || c.user.login.includes('ai') || c.author_association === 'OWNER');
+        if (ai) issue._aiReply = ai.body.slice(0, 200);
+      } catch(e) { /* skip */ }
+    }));
+    renderFeed(issues);
+  } catch(e) {
+    document.getElementById('suggestionFeed').innerHTML = '<div class="feed-loading">Could not load suggestions</div>';
+  }
+}
+
+document.getElementById('submitIdea').addEventListener('click', async () => {
+  const text = document.getElementById('suggestionText').value.trim();
+  const status = document.getElementById('suggestionStatus');
+  if (!text) { status.textContent = 'Please type an idea first'; return; }
+  if (!WORKER_URL) { status.textContent = 'Submissions opening soon — Worker not deployed yet'; return; }
+  status.textContent = 'Submitting...';
+  try {
+    const res = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ suggestion: text })
+    });
+    if (!res.ok) throw new Error(res.status);
+    document.getElementById('suggestionText').value = '';
+    status.textContent = 'Submitted! Your idea will appear shortly.';
+    setTimeout(() => loadSuggestions(), 2000);
+  } catch(e) {
+    status.textContent = 'Failed to submit — try again later';
+  }
+});
+
+loadSuggestions();
 </script>
 </body>
 </html>
