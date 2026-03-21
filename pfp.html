@@ -9,7 +9,7 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: #06080f;
+      background: #1a1c24;
       color: #fff;
       font-family: 'Inter', system-ui, sans-serif;
       min-height: 100vh;
@@ -72,9 +72,8 @@
       display: inline-block;
       box-shadow: 0 0 40px rgba(0,255,0,0.15), 0 0 80px rgba(0,255,0,0.05);
     }
-    .canvas-wrap.circle { border-radius: 50%; }
-    canvas { display: block; }
-    canvas.circle { border-radius: 50%; }
+    canvas { display: block; cursor: grab; }
+    canvas.dragging { cursor: grabbing; }
 
     /* Shape toggle */
     .shape-toggle {
@@ -247,6 +246,8 @@ let currentStyle = 'wick';
 let currentShape = 'circle';
 let ringPct = 5;
 let zoomPct = 100;
+let panX = 0, panY = 0;
+let isDragging = false, dragStartX = 0, dragStartY = 0;
 
 const STYLES = {
   wick:   [{stop:0,c:'#0a5c1a'},{stop:0.2,c:'#10b840'},{stop:0.4,c:'#1a4d2e'},{stop:0.6,c:'#22c55e'},{stop:0.8,c:'#15803d'},{stop:1,c:'#0a5c1a'}],
@@ -281,11 +282,20 @@ function render(outputSize) {
   const outerR = sz / 2;
   const innerR = outerR - ringW;
 
-  // Update preview shape classes
+  // Update preview shape clipping
   if (!outputSize) {
     const wrap = document.querySelector('.canvas-wrap');
-    wrap.classList.toggle('circle', !isHex);
-    canvas.classList.toggle('circle', !isHex);
+    if (isHex) {
+      wrap.style.borderRadius = '0';
+      wrap.style.clipPath = 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)';
+      canvas.style.borderRadius = '0';
+      canvas.style.clipPath = 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)';
+    } else {
+      wrap.style.borderRadius = '50%';
+      wrap.style.clipPath = 'none';
+      canvas.style.borderRadius = '50%';
+      canvas.style.clipPath = 'none';
+    }
   }
 
   // Draw gradient ring
@@ -335,7 +345,9 @@ function render(outputSize) {
     drawW = fitD * scale;
     drawH = drawW / imgAspect;
   }
-  ctx.drawImage(sourceImg, center - drawW/2, center - drawH/2, drawW, drawH);
+  const scaledPanX = panX * (sz / DISPLAY);
+  const scaledPanY = panY * (sz / DISPLAY);
+  ctx.drawImage(sourceImg, center - drawW/2 + scaledPanX, center - drawH/2 + scaledPanY, drawW, drawH);
   ctx.restore();
 }
 
@@ -402,6 +414,38 @@ document.getElementById('stylePills').addEventListener('click', e => {
   render();
 });
 
+// Click-drag repositioning
+canvas.addEventListener('mousedown', e => {
+  isDragging = true;
+  dragStartX = e.clientX - panX;
+  dragStartY = e.clientY - panY;
+  canvas.classList.add('dragging');
+});
+canvas.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  panX = e.clientX - dragStartX;
+  panY = e.clientY - dragStartY;
+  render();
+});
+canvas.addEventListener('mouseup', () => { isDragging = false; canvas.classList.remove('dragging'); });
+canvas.addEventListener('mouseleave', () => { isDragging = false; canvas.classList.remove('dragging'); });
+canvas.addEventListener('touchstart', e => {
+  const t = e.touches[0];
+  isDragging = true;
+  dragStartX = t.clientX - panX;
+  dragStartY = t.clientY - panY;
+  canvas.classList.add('dragging');
+}, { passive: true });
+canvas.addEventListener('touchmove', e => {
+  if (!isDragging) return;
+  e.preventDefault();
+  const t = e.touches[0];
+  panX = t.clientX - dragStartX;
+  panY = t.clientY - dragStartY;
+  render();
+}, { passive: false });
+canvas.addEventListener('touchend', () => { isDragging = false; canvas.classList.remove('dragging'); });
+
 // Download at full resolution
 document.getElementById('downloadBtn').addEventListener('click', () => {
   render(SIZE);
@@ -415,6 +459,7 @@ document.getElementById('downloadBtn').addEventListener('click', () => {
 // Reset
 document.getElementById('resetBtn').addEventListener('click', () => {
   sourceImg = null;
+  panX = 0; panY = 0;
   fileInput.value = '';
   dropzone.style.display = '';
   document.getElementById('previewArea').classList.remove('show');
