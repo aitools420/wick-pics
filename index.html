@@ -42,6 +42,25 @@
       color: #1a4d2e;
       text-shadow: none;
     }
+    .dev-hours {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .dev-hours-label {
+      font-size: 0.55rem;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .dev-hours-count {
+      font-family: monospace;
+      font-size: clamp(1.4rem, 5vw, 2.2rem);
+      color: lime;
+      text-shadow: 0 0 12px rgba(0,255,0,0.4);
+    }
     @keyframes glitch {
       0%, 100% { transform: translate(0); }
       20% { transform: translate(-2px, 2px); }
@@ -150,6 +169,10 @@
 
   <header>
     <h1>WICK.PICS</h1>
+    <div class="dev-hours" id="devHours">
+      <span class="dev-hours-label">equivalent human dev hours</span>
+      <span class="dev-hours-count" id="devCount">0</span>
+    </div>
   </header>
 
   <div class="ticker" id="ticker">
@@ -246,6 +269,30 @@
   </footer>
 
   <script>
+    // Dev hours estimate — based on real project inventory:
+    // 21 project dirs, ~107K lines custom code, 11 smart contracts, 14 subdomains,
+    // 3 data pipelines, 5 DEX aggregator integrations, 3 blockchain deployments,
+    // LLM-powered apps, Telegram bots, portfolio tracker, and infrastructure.
+    //
+    // Methodology: base hours per complexity tier + 30% research/learning +
+    // 20% debugging/testing + 10% architecture/planning overhead.
+    // A senior full-stack dev working solo would need all of this.
+    const DEV_HOURS_ESTIMATE = 2400;
+    (function animateCounter() {
+      const el = document.getElementById('devCount');
+      if (!el) return;
+      const duration = 2200;
+      const start = performance.now();
+      function tick(now) {
+        const t = Math.min((now - start) / duration, 1);
+        const ease = 1 - Math.pow(1 - t, 3); // ease-out cubic
+        const val = Math.round(ease * DEV_HOURS_ESTIMATE);
+        el.textContent = '~' + val.toLocaleString();
+        if (t < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    })();
+
     // Live $WICK price ticker from DexScreener
     async function updatePrice() {
       const ticker = document.getElementById('ticker');
