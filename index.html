@@ -43,23 +43,79 @@
       text-shadow: none;
     }
     .dev-hours {
-      margin-top: 16px;
+      margin-top: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
     }
     .dev-hours-label {
-      font-size: 0.55rem;
-      color: #666;
+      font-size: 0.5rem;
+      color: #555;
       text-transform: uppercase;
-      letter-spacing: 2px;
+      letter-spacing: 3px;
     }
     .dev-hours-count {
       font-family: monospace;
-      font-size: clamp(1.4rem, 5vw, 2.2rem);
+      font-size: clamp(2rem, 7vw, 3.5rem);
+      font-weight: bold;
       color: lime;
-      text-shadow: 0 0 12px rgba(0,255,0,0.4);
+      text-shadow: 0 0 20px rgba(0,255,0,0.35), 0 0 40px rgba(0,255,0,0.15);
+      line-height: 1;
+    }
+    .dev-hours-sub {
+      font-size: 0.6rem;
+      color: #888;
+      margin-top: 2px;
+    }
+    .dev-breakdown {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+      max-width: 560px;
+    }
+    .dev-chip {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid #2a2a2a;
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-family: monospace;
+      font-size: 0.6rem;
+      color: #888;
+      white-space: nowrap;
+      transition: border-color 0.3s;
+    }
+    .dev-chip:hover {
+      border-color: #444;
+    }
+    .dev-chip b {
+      color: lime;
+      font-weight: normal;
+    }
+    .dev-loc {
+      margin-top: 10px;
+      font-family: monospace;
+      font-size: 0.55rem;
+      color: #555;
+      letter-spacing: 1px;
+    }
+    .dev-loc span {
+      color: #3fb950;
+    }
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+    .dev-live-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: lime;
+      border-radius: 50%;
+      margin-right: 5px;
+      animation: pulse-glow 2s ease-in-out infinite;
     }
     @keyframes glitch {
       0%, 100% { transform: translate(0); }
@@ -161,6 +217,8 @@
       .frog-gun { font-size: 4rem; }
       .hero { padding: 10px; }
       .btn { padding: 10px 20px; font-size: 0.7rem; }
+      .dev-breakdown { gap: 5px; max-width: 320px; }
+      .dev-chip { font-size: 0.5rem; padding: 4px 9px; }
     }
   </style>
 </head>
@@ -172,6 +230,15 @@
     <div class="dev-hours" id="devHours">
       <span class="dev-hours-label">equivalent human dev hours</span>
       <span class="dev-hours-count" id="devCount">0</span>
+      <span class="dev-hours-sub">saved by building with AI agents</span>
+      <div class="dev-breakdown">
+        <span class="dev-chip"><b>+30%</b> research</span>
+        <span class="dev-chip"><b>+20%</b> debugging</span>
+        <span class="dev-chip"><b>+10%</b> architecture</span>
+        <span class="dev-chip"><b>21</b> projects</span>
+        <span class="dev-chip"><b>11</b> smart contracts</span>
+      </div>
+      <div class="dev-loc"><span class="dev-live-dot"></span><span id="locCount">107,000</span> lines of custom code</div>
     </div>
   </header>
 
@@ -278,20 +345,19 @@
     // 20% debugging/testing + 10% architecture/planning overhead.
     // A senior full-stack dev working solo would need all of this.
     const DEV_HOURS_ESTIMATE = 2400;
-    (function animateCounter() {
-      const el = document.getElementById('devCount');
-      if (!el) return;
-      const duration = 2200;
+    const LOC_ESTIMATE = 107000;
+    function animateCount(el, target, prefix, duration) {
       const start = performance.now();
       function tick(now) {
         const t = Math.min((now - start) / duration, 1);
-        const ease = 1 - Math.pow(1 - t, 3); // ease-out cubic
-        const val = Math.round(ease * DEV_HOURS_ESTIMATE);
-        el.textContent = '~' + val.toLocaleString();
+        const ease = 1 - Math.pow(1 - t, 3);
+        el.textContent = (prefix || '') + Math.round(ease * target).toLocaleString();
         if (t < 1) requestAnimationFrame(tick);
       }
       requestAnimationFrame(tick);
-    })();
+    }
+    animateCount(document.getElementById('devCount'), DEV_HOURS_ESTIMATE, '~', 2200);
+    animateCount(document.getElementById('locCount'), LOC_ESTIMATE, '', 2600);
 
     // Live $WICK price ticker from DexScreener
     async function updatePrice() {
