@@ -391,7 +391,7 @@
         const mc = best.marketCap;
         const ch = change?.toFixed(2) || 0;
         const chColor = parseFloat(ch) < 0 ? '#f85149' : 'lime';
-        ticker.innerHTML = `$${parseFloat(price).toFixed(6)} | <span style="white-space:nowrap;color:${chColor}">24h: ${ch}%</span> | <span style="white-space:nowrap">MC:&nbsp;$${mc?.toLocaleString() || 'N/A'}</span>`;
+        ticker.innerHTML = `$${parseFloat(price).toPrecision(2)} | <span style="white-space:nowrap;color:${chColor}">24h: ${ch}%</span> | <span style="white-space:nowrap">MC:&nbsp;$${mc?.toLocaleString() || 'N/A'}</span>`;
       } catch (e) {
         ticker.textContent = '$WICK: Unavailable';
       }
