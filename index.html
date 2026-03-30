@@ -145,6 +145,10 @@
       color: lime;
       font-weight: bold;
     }
+    .ticker:hover {
+      box-shadow: 0 0 30px rgba(0,255,0,0.8);
+      border-color: #00ff88;
+    }
     .hero {
       display: flex;
       justify-content: center;
@@ -244,9 +248,11 @@
     </div>
   </header>
 
-  <div class="ticker" id="ticker">
-    Loading $WICK price...
-  </div>
+  <a href="https://dexscreener.com/pulsechain/0xb2406c1e31da31c1118e4dbcb4ed2456fecfc6ce" target="_blank" rel="noopener" style="text-decoration:none;display:block">
+    <div class="ticker" id="ticker" style="cursor:pointer;transition:box-shadow 0.2s,border-color 0.2s">
+      Loading $WICK price...
+    </div>
+  </a>
 
   <div class="social-row">
     <!-- DexScreener -->
