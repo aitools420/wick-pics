@@ -63,6 +63,29 @@
       text-shadow: 0 0 20px rgba(0,255,0,0.35), 0 0 40px rgba(0,255,0,0.15);
       line-height: 1;
     }
+    .dev-hours-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+    }
+    .dev-hours-equiv {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 2px;
+      text-align: left;
+    }
+    .dev-hours-equiv span {
+      font-size: 0.65rem;
+      color: #aaa;
+      font-family: monospace;
+      line-height: 1.3;
+    }
+    .dev-hours-equiv b {
+      color: lime;
+      font-size: 0.75rem;
+    }
     .dev-hours-sub {
       font-size: 0.6rem;
       color: #888;
@@ -235,7 +258,14 @@
     <h1>WICK.PICS</h1>
     <div class="dev-hours" id="devHours">
       <span class="dev-hours-label">equivalent human dev hours</span>
-      <span class="dev-hours-count" id="devCount">0</span>
+      <div class="dev-hours-row">
+        <span class="dev-hours-count" id="devCount">0</span>
+        <div class="dev-hours-equiv" id="devEquiv">
+          <span><b id="eqDays">0</b> days</span>
+          <span><b id="eqWeeks">0</b> weeks</span>
+          <span><b id="eqYears">0</b> years</span>
+        </div>
+      </div>
       <span class="dev-hours-sub">saved by building with AI agents</span>
       <div class="dev-breakdown">
         <span class="dev-chip"><b>20%</b> research</span>
@@ -373,6 +403,13 @@
     }
     animateCount(document.getElementById('devCount'), DEV_HOURS_ESTIMATE, '~', 2200);
     animateCount(document.getElementById('locCount'), LOC_ESTIMATE, '', 2600);
+    // Equivalent time breakdowns (8-hour working days)
+    const days = Math.round(DEV_HOURS_ESTIMATE / 8);
+    const weeks = Math.round(days / 5);
+    const years = (DEV_HOURS_ESTIMATE / 2080).toFixed(1); // 2080 = 40hrs × 52wks
+    document.getElementById('eqDays').textContent = days.toLocaleString();
+    document.getElementById('eqWeeks').textContent = weeks.toLocaleString();
+    document.getElementById('eqYears').textContent = years;
 
     // Live $WICK price ticker from DexScreener
     async function updatePrice() {
