@@ -130,6 +130,15 @@
       margin-right: 5px;
       animation: pulse-glow 2s ease-in-out infinite;
     }
+    .stats-equiv {
+      margin-top: 10px;
+      font-family: monospace;
+      font-size: 0.6rem;
+      color: #666;
+    }
+    .stats-equiv b {
+      color: lime;
+    }
     .stats-right {
       display: flex;
       flex-direction: column;
@@ -303,6 +312,9 @@
           <span class="stats-chip"><b>11</b> smart contracts</span>
         </div>
         <div class="stats-loc"><span class="stats-live-dot"></span><span id="locCount">107,000</span> lines of custom code</div>
+        <div class="stats-equiv">
+          <span><b id="eqDays">0</b> days</span> · <span><b id="eqWeeks">0</b> weeks</span> · <span><b id="eqYears">0</b> years</span>
+        </div>
       </div>
       <div class="stats-right">
         <div class="stat-item">
@@ -441,6 +453,14 @@
     }
     animateCount(document.getElementById('devCount'), DEV_HOURS_ESTIMATE, '~', 2200);
     animateCount(document.getElementById('locCount'), LOC_ESTIMATE, '', 2600);
+
+    // Equivalent time breakdowns (8-hour working days)
+    const days = Math.round(DEV_HOURS_ESTIMATE / 8);
+    const weeks = Math.round(days / 5);
+    const years = (DEV_HOURS_ESTIMATE / 2080).toFixed(1);
+    document.getElementById('eqDays').textContent = days.toLocaleString();
+    document.getElementById('eqWeeks').textContent = weeks.toLocaleString();
+    document.getElementById('eqYears').textContent = years;
 
     // Live $WICK price ticker from DexScreener
     async function updatePrice() {
