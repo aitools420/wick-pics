@@ -89,6 +89,46 @@
       color: #888;
       line-height: 1.6;
     }
+    .stats-detail {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 16px;
+    }
+    .stats-chip {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid #2a2a2a;
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-family: monospace;
+      font-size: 0.6rem;
+      color: #888;
+      white-space: nowrap;
+      transition: border-color 0.3s;
+    }
+    .stats-chip:hover { border-color: #444; }
+    .stats-chip b { color: lime; font-weight: normal; }
+    .stats-loc {
+      margin-top: 12px;
+      font-family: monospace;
+      font-size: 0.55rem;
+      color: #555;
+      letter-spacing: 1px;
+    }
+    .stats-loc span { color: #3fb950; }
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+    .stats-live-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: lime;
+      border-radius: 50%;
+      margin-right: 5px;
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
     .stats-right {
       display: flex;
       flex-direction: column;
@@ -249,6 +289,17 @@
       <div class="stats-left">
         <h2>Equivalent Human Hours</h2>
         <p>Automated processing cycles converted to human manual labor metrics. The efficiency of the void measured in biological time.</p>
+        <div class="stats-detail">
+          <span class="stats-chip"><b>20%</b> research</span>
+          <span class="stats-chip"><b>15%</b> architecture</span>
+          <span class="stats-chip"><b>50%</b> coding</span>
+          <span class="stats-chip"><b>15%</b> debugging</span>
+        </div>
+        <div class="stats-detail">
+          <span class="stats-chip"><b>27</b> projects</span>
+          <span class="stats-chip"><b>11</b> smart contracts</span>
+        </div>
+        <div class="stats-loc"><span class="stats-live-dot"></span><span id="locCount">107,000</span> lines of custom code</div>
       </div>
       <div class="stats-right">
         <div class="stat-item">
@@ -386,6 +437,7 @@
       requestAnimationFrame(tick);
     }
     animateCount(document.getElementById('devCount'), DEV_HOURS_ESTIMATE, '~', 2200);
+    animateCount(document.getElementById('locCount'), LOC_ESTIMATE, '', 2600);
 
     // Live $WICK price ticker from DexScreener
     async function updatePrice() {
