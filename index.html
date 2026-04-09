@@ -43,6 +43,11 @@
       text-shadow: 0 0 10px rgba(0, 255, 0, 0.7);
       letter-spacing: -0.05em;
       line-height: 1;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+    header {
+      overflow: hidden;
     }
     .dev-hours {
       margin-top: 20px;
@@ -243,8 +248,10 @@
     /* Responsive */
     @media (max-width: 700px) {
       .project-grid { grid-template-columns: 1fr !important; }
-      .social-row { gap: 12px; padding: 20px 12px; }
-      .social-icon { width: 62px; height: 62px; min-width: 62px; min-height: 62px; }
+      .social-row { gap: 12px; padding: 20px 12px; max-width: 100%; }
+      .social-icon { width: 54px; height: 54px; min-width: 54px; min-height: 54px; }
+      .social-icon svg { width: 26px; height: 26px; }
+      .social-icon img { width: 34px !important; height: 34px !important; }
       .frog-gun { font-size: 4rem; }
       .hero { padding: 10px; }
       .btn { padding: 10px 20px; font-size: 0.7rem; }
