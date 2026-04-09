@@ -240,23 +240,6 @@
       max-width: 600px;
       margin: 10px auto;
     }
-    .announce-bar {
-      display: block;
-      background: linear-gradient(90deg, #0d1f0d, #1a3d1a, #0d1f0d);
-      border-bottom: 2px solid lime;
-      padding: 12px 20px;
-      text-align: center;
-      font-size: 0.7rem;
-      color: #ccc;
-      line-height: 1.6;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .announce-bar:hover { background: linear-gradient(90deg, #0d2f0d, #1a4d1a, #0d2f0d); }
-    .announce-bar a { color: lime; text-decoration: none; font-weight: bold; }
-    .announce-bar a:hover { text-decoration: underline; }
-    .announce-new { display: inline-block; background: lime; color: #000; padding: 2px 6px; font-size: 0.55rem; border-radius: 3px; margin-right: 6px; vertical-align: middle; }
-
     /* Responsive */
     @media (max-width: 700px) {
       .project-grid { grid-template-columns: 1fr !important; }
@@ -272,11 +255,6 @@
 </head>
 <body>
   <div class="psychedelic-bg"></div>
-
-  <a href="https://swap.wick.pics" class="announce-bar" target="_blank">
-    <span class="announce-new">NEW</span>
-    swap.wick.pics — Compare real-time quotes across every PulseChain DEX aggregator. Non-custodial, no fees from us.
-  </a>
 
   <header>
     <h1>WICK.PICS</h1>
@@ -312,6 +290,10 @@
       Loading $WICK price...
     </div>
   </a>
+
+  <div style="text-align:center;margin:14px auto 0">
+    <a href="https://swap.wick.pics" target="_blank" style="display:inline-block;padding:8px 28px;font-family:'Press Start 2P',cursive;font-size:0.65rem;color:#3fb950;border:1px solid #2a2a2a;border-radius:20px;text-decoration:none;letter-spacing:2px;transition:all 0.2s;background:rgba(255,255,255,0.02)" onmouseenter="this.style.borderColor='lime';this.style.boxShadow='0 0 12px rgba(0,255,0,0.2)'" onmouseleave="this.style.borderColor='#2a2a2a';this.style.boxShadow='none'">BUY WICK</a>
+  </div>
 
   <div class="social-row">
     <!-- DexScreener -->
