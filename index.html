@@ -435,6 +435,11 @@
           <tr><td colspan="4" style="padding:30px;color:#555;text-align:center">Loading pools...</td></tr>
         </tbody>
         <tfoot id="lp-foot" style="display:none">
+          <tr id="lp-show-all-row" style="display:none">
+            <td colspan="4" style="padding:0;text-align:center">
+              <button id="lp-show-all-btn" onclick="toggleAllPools()" style="width:100%;padding:14px;background:#1a1a1a;border:1px solid lime;border-radius:0;color:lime;font-family:'Press Start 2P',cursive;font-size:0.5rem;letter-spacing:1px;cursor:pointer;transition:all 0.2s" onmouseenter="this.style.background='rgba(0,255,0,0.1)'" onmouseleave="this.style.background='#1a1a1a'">SHOW ALL LIQUIDITY POOLS</button>
+            </td>
+          </tr>
           <tr style="background:#1a1a1a;border-top:2px solid lime">
             <td style="padding:12px 16px;color:#fff;font-weight:bold;text-align:left">TOTAL</td>
             <td id="lp-total-liq" style="padding:12px 16px;color:lime;font-weight:bold;text-align:right"></td>
@@ -589,11 +594,41 @@
           foot.style.display = '';
           document.getElementById('lp-total-liq').textContent = fmtUsd(totalLiq);
           document.getElementById('lp-total-vol').textContent = fmtUsd(totalVol);
+
+          // Show only top 6, hide the rest
+          const allRows = body.querySelectorAll('tr');
+          const LP_VISIBLE = 6;
+          const showAllRow = document.getElementById('lp-show-all-row');
+          const showAllBtn = document.getElementById('lp-show-all-btn');
+          if (allRows.length > LP_VISIBLE) {
+            const expanded = showAllBtn.dataset.expanded === '1';
+            for (let i = LP_VISIBLE; i < allRows.length; i++) {
+              allRows[i].style.display = expanded ? '' : 'none';
+            }
+            showAllRow.style.display = '';
+            showAllBtn.textContent = expanded ? 'SHOW LESS' : 'SHOW ALL LIQUIDITY POOLS (' + allRows.length + ')';
+          } else {
+            showAllRow.style.display = 'none';
+          }
         }
       } catch (e) {
         console.warn('LP fetch failed:', e);
       }
     }
+
+    function toggleAllPools() {
+      const btn = document.getElementById('lp-show-all-btn');
+      const body = document.getElementById('lp-body');
+      const allRows = body.querySelectorAll('tr');
+      const LP_VISIBLE = 6;
+      const expanding = btn.dataset.expanded !== '1';
+      btn.dataset.expanded = expanding ? '1' : '0';
+      for (let i = LP_VISIBLE; i < allRows.length; i++) {
+        allRows[i].style.display = expanding ? '' : 'none';
+      }
+      btn.textContent = expanding ? 'SHOW LESS' : 'SHOW ALL LIQUIDITY POOLS (' + allRows.length + ')';
+    }
+
     updatePools();
     setInterval(updatePools, 60000);
   </script>
