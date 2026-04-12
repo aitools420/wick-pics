@@ -285,6 +285,7 @@
       .btn { padding: 10px 20px; font-size: 0.7rem; }
       .dev-breakdown { gap: 5px; max-width: 320px; }
       .dev-chip { font-size: 0.5rem; padding: 4px 9px; }
+      .lp-hide-mobile { display: none; }
     }
   </style>
 </head>
@@ -416,6 +417,35 @@
     </div>
   </section>
 
+  <!-- Active Liquidity Pools -->
+  <section id="lp-section" style="padding:40px 20px;text-align:center;max-width:900px;margin:0 auto">
+    <h2 style="font-family:'Bungee Shade',cursive;color:lime;margin-bottom:6px;font-size:clamp(1.2rem,4vw,2rem);">Active Liquidity Pools</h2>
+    <p style="color:#666;font-size:0.6rem;margin-bottom:24px;font-family:monospace"><span class="stats-live-dot"></span>Auto-updated from on-chain data</p>
+    <div style="border:1px solid #2a2a2a;border-radius:12px;overflow:hidden;background:#111;box-shadow:0 0 30px rgba(0,255,0,0.08)">
+      <table id="lp-table" style="width:100%;border-collapse:collapse;font-family:monospace;font-size:0.75rem">
+        <thead>
+          <tr style="background:#1a1a1a;border-bottom:2px solid lime">
+            <th style="text-align:left;padding:14px 16px;color:lime;font-family:'Press Start 2P',cursive;font-size:0.5rem;letter-spacing:1px;text-transform:uppercase">Token Pair</th>
+            <th style="text-align:right;padding:14px 16px;color:lime;font-family:'Press Start 2P',cursive;font-size:0.5rem;letter-spacing:1px;text-transform:uppercase">Liquidity</th>
+            <th style="text-align:right;padding:14px 16px;color:lime;font-family:'Press Start 2P',cursive;font-size:0.5rem;letter-spacing:1px;text-transform:uppercase" class="lp-hide-mobile">24h Vol</th>
+            <th style="text-align:right;padding:14px 16px;color:lime;font-family:'Press Start 2P',cursive;font-size:0.5rem;letter-spacing:1px;text-transform:uppercase">DEX &amp; Action</th>
+          </tr>
+        </thead>
+        <tbody id="lp-body">
+          <tr><td colspan="4" style="padding:30px;color:#555;text-align:center">Loading pools...</td></tr>
+        </tbody>
+        <tfoot id="lp-foot" style="display:none">
+          <tr style="background:#1a1a1a;border-top:2px solid lime">
+            <td style="padding:12px 16px;color:#fff;font-weight:bold;text-align:left">TOTAL</td>
+            <td id="lp-total-liq" style="padding:12px 16px;color:lime;font-weight:bold;text-align:right"></td>
+            <td id="lp-total-vol" style="padding:12px 16px;color:lime;font-weight:bold;text-align:right" class="lp-hide-mobile"></td>
+            <td style="padding:12px 16px"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </section>
+
   <footer class="footer">
     <p>GREEN WICK ($WICK) on PulseChain</p>
     <p class="contract">Contract: 0x8CDaf3d630Da9E1450832924D5701CC0500E9cfC</p>
@@ -482,6 +512,87 @@
     // Update every 60 seconds
     updatePrice();
     setInterval(updatePrice, 60000);
+
+    // Active Liquidity Pools — fetches from DexScreener
+    const DEX_NAMES = { pulsex_v1: 'PulseX V1', pulsex_v2: 'PulseX V2', '9mm': '9mm', '9inch': '9inch' };
+    const DEX_COLORS = { pulsex_v1: '#00ff00', pulsex_v2: '#ff00ff', '9mm': '#00ffff', '9inch': '#ff8c00' };
+    const LP_LINKS = {
+      pulsex_v1: 'https://app.v1.pulsex.com/add/',
+      pulsex_v2: 'https://app.pulsex.com/add/',
+    };
+
+    function fmtUsd(n) {
+      if (n == null) return '$0';
+      if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
+      if (n >= 1e3) return '$' + (n / 1e3).toFixed(2) + 'K';
+      return '$' + n.toFixed(2);
+    }
+    function fmtTokens(n) {
+      if (n == null) return '0';
+      if (n >= 1e9) return (n / 1e9).toFixed(1) + 'B';
+      if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+      if (n >= 1e3) return (n / 1e3).toFixed(0) + 'K';
+      return n.toFixed(0);
+    }
+
+    async function updatePools() {
+      try {
+        const ca = '0x8CDaf3d630Da9E1450832924D5701CC0500E9cfC'.toLowerCase();
+        const resp = await fetch('https://api.dexscreener.com/latest/dex/tokens/' + ca);
+        const data = await resp.json();
+        const pairs = (data.pairs || []).filter(p => p.chainId === 'pulsechain');
+        if (pairs.length === 0) return;
+
+        // Sort by liquidity descending
+        pairs.sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0));
+
+        const body = document.getElementById('lp-body');
+        const foot = document.getElementById('lp-foot');
+        let totalLiq = 0, totalVol = 0;
+        let rows = '';
+
+        for (const pair of pairs) {
+          const liqUsd = pair.liquidity?.usd || 0;
+          if (liqUsd < 1) continue; // skip dead pools
+          const volH24 = pair.volume?.h24 || 0;
+          totalLiq += liqUsd;
+          totalVol += volH24;
+
+          const dexId = pair.dexId || 'unknown';
+          const dexName = DEX_NAMES[dexId] || dexId;
+          const dexColor = DEX_COLORS[dexId] || '#888';
+          const quoteSymbol = pair.quoteToken?.symbol || 'WPLS';
+          const baseLiq = pair.liquidity?.base || 0;
+          const quoteLiq = pair.liquidity?.quote || 0;
+          const lpLink = LP_LINKS[dexId];
+          const dsLink = pair.url || 'https://dexscreener.com/pulsechain/' + pair.pairAddress;
+
+          rows += '<tr style="border-bottom:1px solid #1f1f1f;transition:background 0.15s" onmouseenter="this.style.background=\'#1a1a1a\'" onmouseleave="this.style.background=\'transparent\'">';
+          rows += '<td style="padding:14px 16px;text-align:left"><span style="color:#fff;font-weight:bold">WICK</span><span style="color:#555"> / </span><span style="color:#ccc">' + quoteSymbol + '</span>';
+          rows += '<div style="color:#555;font-size:0.6rem;margin-top:3px">' + fmtTokens(baseLiq) + ' WICK / ' + fmtTokens(quoteLiq) + ' ' + quoteSymbol + '</div></td>';
+          rows += '<td style="padding:14px 16px;text-align:right;color:lime;font-weight:bold">' + fmtUsd(liqUsd) + '</td>';
+          rows += '<td style="padding:14px 16px;text-align:right;color:#ccc" class="lp-hide-mobile">' + fmtUsd(volH24) + '</td>';
+          rows += '<td style="padding:14px 16px;text-align:right;white-space:nowrap">';
+          rows += '<span style="display:inline-block;padding:4px 10px;border-radius:12px;font-size:0.6rem;font-weight:bold;color:#000;background:' + dexColor + ';margin-right:6px">' + dexName + '</span>';
+          if (lpLink) {
+            rows += '<a href="' + lpLink + ca + '/" target="_blank" rel="noopener" style="display:inline-block;padding:4px 10px;border-radius:12px;font-size:0.6rem;color:lime;border:1px solid lime;text-decoration:none;transition:all 0.2s" onmouseenter="this.style.background=\'rgba(0,255,0,0.15)\'" onmouseleave="this.style.background=\'transparent\'">+ LP</a>';
+          }
+          rows += ' <a href="' + dsLink + '" target="_blank" rel="noopener" style="display:inline-block;padding:4px 8px;border-radius:12px;font-size:0.55rem;color:#888;border:1px solid #333;text-decoration:none;transition:all 0.2s" onmouseenter="this.style.borderColor=\'#555\'" onmouseleave="this.style.borderColor=\'#333\'">chart</a>';
+          rows += '</td></tr>';
+        }
+
+        if (rows) {
+          body.innerHTML = rows;
+          foot.style.display = '';
+          document.getElementById('lp-total-liq').textContent = fmtUsd(totalLiq);
+          document.getElementById('lp-total-vol').textContent = fmtUsd(totalVol);
+        }
+      } catch (e) {
+        console.warn('LP fetch failed:', e);
+      }
+    }
+    updatePools();
+    setInterval(updatePools, 60000);
   </script>
 </body>
 </html>
