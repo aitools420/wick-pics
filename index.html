@@ -312,19 +312,15 @@
     </div>
   </section>
   <style>
-    .frame-card{width:460px;max-width:calc(100vw - 40px);background:#0a0a0a;border:2px solid lime;border-radius:8px;box-shadow:0 0 20px rgba(0,255,0,0.25);overflow:hidden}
+    .frame-card{width:480px;max-width:calc(100vw - 40px);background:#0a0a0a;border:2px solid lime;border-radius:8px;box-shadow:0 0 20px rgba(0,255,0,0.25);overflow:hidden}
     .frame-label{padding:8px 12px;background:#111;border-bottom:1px solid #1f3f1f;font-family:'Press Start 2P',cursive;font-size:0.55rem;letter-spacing:1px}
     .frame-label a{color:#3fb950;text-decoration:none}
     .frame-label a:hover{color:#00ff00;text-shadow:0 0 6px rgba(0,255,0,0.6)}
-    .frame-window{position:relative;width:100%;height:520px;overflow:hidden;background:#0d1117}
-    .frame-iframe{position:absolute;border:0;pointer-events:auto;top:0;left:0;transform-origin:top left}
-    /* survey: render at desktop width, scale down so left edge of content is visible */
-    .frame-survey{width:1100px;height:900px;transform:scale(0.62)}
-    /* lfg: render at desktop width, scale down; no vertical offset needed when anchored top-left */
-    .frame-lfg{width:1100px;height:900px;transform:scale(0.62)}
+    /* Height matches survey Q&A layout; both frames share it. LFG just scrolls/clips. */
+    .frame-window{position:relative;width:100%;height:340px;overflow:hidden;background:#0d1117}
+    .frame-iframe{position:absolute;border:0;pointer-events:auto;top:0;left:0;transform-origin:top left;width:800px;height:570px;transform:scale(0.6)}
     @media(max-width:700px){
       .frame-card{width:100%}
-      .frame-window{height:420px}
     }
   </style>
 
