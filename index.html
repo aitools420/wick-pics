@@ -309,7 +309,7 @@
       <div class="frame-window">
         <iframe src="https://lfg.wick.pics" loading="lazy" class="frame-iframe frame-lfg" title="lfg.wick.pics live preview"></iframe>
       </div>
-      <button class="shill-btn" type="button" onclick="shillRandom(this)">🚀 SHILL A CLASSIC</button>
+      <button class="shill-btn" type="button" onclick="shillRandom(this)">🚀 RANDOM SHILL</button>
     </div>
   </section>
   <style>
@@ -320,31 +320,46 @@
     /* Height matches survey Q&A layout; both frames share it. LFG just scrolls/clips. */
     .frame-window{position:relative;width:100%;height:340px;overflow:hidden;background:#0d1117}
     .frame-iframe{position:absolute;border:0;pointer-events:auto;top:0;left:0;transform-origin:top left;width:800px;height:570px;transform:scale(0.6)}
-    .shill-btn{width:100%;padding:12px;border:0;border-top:1px solid #1f3f1f;background:#111;color:#ff0;font-family:'Press Start 2P',cursive;font-size:0.7rem;letter-spacing:1px;cursor:pointer;transition:background 0.2s}
+    .shill-btn{display:none;width:100%;padding:12px;border:0;border-top:1px solid #1f3f1f;background:#111;color:#ff0;font-family:'Press Start 2P',cursive;font-size:0.7rem;letter-spacing:1px;cursor:pointer;transition:background 0.2s}
     .shill-btn:hover:not(:disabled){background:#1a1a00}
     .shill-btn:disabled{opacity:0.6;cursor:default}
     @media(max-width:700px){
       .frame-card{width:100%}
+      .shill-btn{display:block}
     }
   </style>
   <script>
     (function(){
-      var SHILL_QUOTES = ["LFG","Have fun staying poor","Few understand this","This is the way","WAGMI","Higher","You are NOT bullish enough","We are so early","Apes strong together","Number go up technology","Up only","Zoom out","HODL","Diamond hands only","Bullish on the tech. Bullish on the team. Bullish on the vibes"];
+      var FALLBACK_QUOTES = ["LFG","WAGMI","Higher","HODL","Up only","Zoom out"];
+      var quoteCache = null;
+      function fetchQuotes(){
+        if (quoteCache) return Promise.resolve(quoteCache);
+        return fetch('https://lfg.wick.pics/').then(function(r){ return r.text(); }).then(function(html){
+          var doc = new DOMParser().parseFromString(html, 'text/html');
+          var quotes = Array.from(doc.querySelectorAll('.quote'))
+            .map(function(el){ return (el.textContent || '').trim(); })
+            .filter(function(t){ return t && t.length <= 200 && !t.startsWith('Last chance to buy'); });
+          quoteCache = quotes.length ? quotes : FALLBACK_QUOTES;
+          return quoteCache;
+        }).catch(function(){ return FALLBACK_QUOTES; });
+      }
       window.shillRandom = function(btn){
-        var q = SHILL_QUOTES[Math.floor(Math.random() * SHILL_QUOTES.length)];
         var orig = btn.textContent;
         btn.disabled = true;
-        btn.textContent = 'SHILLING: ' + q;
-        fetch('https://lfg.wick.pics/api/shill?quote=' + encodeURIComponent(q), {method:'POST'})
-          .then(function(r){ return r.json(); })
-          .then(function(d){
-            btn.textContent = d.ok ? '✅ ' + q : '⚠ ' + (d.error || 'failed');
-            setTimeout(function(){ btn.textContent = orig; btn.disabled = false; }, 4000);
-          })
-          .catch(function(){
-            btn.textContent = '⚠ network error';
-            setTimeout(function(){ btn.textContent = orig; btn.disabled = false; }, 4000);
-          });
+        btn.textContent = 'PICKING...';
+        fetchQuotes().then(function(quotes){
+          var q = quotes[Math.floor(Math.random() * quotes.length)];
+          btn.textContent = 'SHILLING: ' + q;
+          return fetch('https://lfg.wick.pics/api/shill?quote=' + encodeURIComponent(q), {method:'POST'})
+            .then(function(r){ return r.json(); })
+            .then(function(d){
+              btn.textContent = d.ok ? '✅ ' + q : '⚠ ' + (d.error || 'failed');
+              setTimeout(function(){ btn.textContent = orig; btn.disabled = false; }, 4000);
+            });
+        }).catch(function(){
+          btn.textContent = '⚠ network error';
+          setTimeout(function(){ btn.textContent = orig; btn.disabled = false; }, 4000);
+        });
       };
     })();
   </script>
