@@ -358,7 +358,7 @@
         fetchQuotes().then(function(quotes){
           var q = quotes[Math.floor(Math.random() * quotes.length)];
           btn.textContent = 'SHILLING: ' + q;
-          return fetch('https://lfg.wick.pics/api/shill?quote=' + encodeURIComponent(q), {method:'POST'})
+          return fetch('https://lfg-shill.trevorgdhawg.workers.dev/shill?quote=' + encodeURIComponent(q), {method:'POST'})
             .then(function(r){ return r.json(); })
             .then(function(d){
               btn.textContent = d.ok ? '✅ ' + q : '⚠ ' + (d.error || 'failed');
