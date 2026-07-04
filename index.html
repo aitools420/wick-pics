@@ -303,6 +303,37 @@
     <h1>WICK.PICS</h1>
   </header>
 
+  <div class="ca-bar">
+    <span class="ca-label">$WICK CONTRACT</span>
+    <button type="button" class="ca-copy" onclick="copyWickCa(this)" title="Click to copy the $WICK contract address">
+      <span class="ca-addr">0x8CDaf3d630Da9E1450832924D5701CC0500E9cfC</span>
+      <span class="ca-hint">📋 click to copy</span>
+    </button>
+  </div>
+  <style>
+    .ca-bar{display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px 20px 6px;position:relative;z-index:2}
+    .ca-label{font-family:'Press Start 2P',cursive;font-size:0.55rem;letter-spacing:2px;color:lime;text-transform:uppercase}
+    .ca-copy{display:inline-flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;max-width:calc(100vw - 40px);background:#0a0a0a;border:2px solid lime;border-radius:8px;padding:10px 16px;cursor:pointer;box-shadow:0 0 14px rgba(0,255,0,0.2);transition:background .15s,box-shadow .15s}
+    .ca-copy:hover{background:#0f1a0f;box-shadow:0 0 22px rgba(0,255,0,0.45)}
+    .ca-copy:active{transform:translateY(1px)}
+    .ca-addr{font-family:ui-monospace,'Courier New',monospace;font-size:0.8rem;color:#00ff00;word-break:break-all;letter-spacing:0.5px}
+    .ca-hint{font-family:'Press Start 2P',cursive;font-size:0.5rem;color:#3fb950;white-space:nowrap}
+    .ca-copy.copied{background:#0f2a0f;border-color:#00ff00}
+    .ca-copy.copied .ca-hint{color:#00ff00}
+    @media(max-width:700px){.ca-addr{font-size:0.62rem}}
+  </style>
+  <script>
+    function copyWickCa(el){
+      var ca='0x8CDaf3d630Da9E1450832924D5701CC0500E9cfC';
+      var hint=el.querySelector('.ca-hint');
+      var reset=function(){ el.classList.remove('copied'); if(hint) hint.textContent='📋 click to copy'; };
+      var done=function(){ el.classList.add('copied'); if(hint) hint.textContent='✓ copied!'; setTimeout(reset,1400); };
+      var fallback=function(){ try{var ta=document.createElement('textarea');ta.value=ca;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.focus();ta.select();document.execCommand('copy');document.body.removeChild(ta);}catch(e){} };
+      if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(ca).then(done).catch(function(){fallback();done();}); }
+      else { fallback(); done(); }
+    }
+  </script>
+
   <section class="site-frames" style="display:flex;flex-wrap:wrap;justify-content:center;gap:20px;padding:30px 20px;position:relative;z-index:2">
     <div class="frame-card">
       <div class="frame-label"><a href="https://survey.wick.pics" target="_blank" rel="noopener">survey.wick.pics ↗</a></div>
