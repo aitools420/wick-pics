@@ -46,6 +46,14 @@
       word-break: break-word;
       max-width: 100%;
     }
+    .slogan {
+      margin-top: 14px;
+      font-family: 'Bungee Shade', cursive;
+      font-size: clamp(0.85rem, 3.2vw, 1.6rem);
+      color: #baffba;
+      text-shadow: 0 0 8px rgba(0, 255, 0, 0.55);
+      letter-spacing: 0.08em;
+    }
     .stats-box {
       max-width: 900px;
       margin: 30px auto 0;
@@ -301,6 +309,7 @@
 
   <header>
     <h1>WICK.PICS</h1>
+    <p class="slogan">NEVER KILL A FROGS DOG</p>
   </header>
 
   <div class="ca-bar">
@@ -308,8 +317,17 @@
       <span class="ca-addr">0x8CDaf3d630Da9E1450832924D5701CC0500E9cfC</span>
     </button>
   </div>
+  <div class="ca-links">
+    <a class="ca-link" href="https://sites.wick.pics/gui" target="_blank" rel="noopener">🖥️ SITES GUI</a>
+    <a class="ca-link" href="https://sim.wick.pics" target="_blank" rel="noopener">🎮 SIM.WICK.PICS</a>
+  </div>
   <style>
     .ca-bar{display:flex;justify-content:center;padding:18px 20px 6px;position:relative;z-index:2}
+    .ca-links{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;padding:4px 20px 10px;position:relative;z-index:2}
+    .ca-link{display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,'Courier New',monospace;font-size:0.8rem;font-weight:700;letter-spacing:0.5px;color:#00ff00;background:#0a0a0a;border:2px solid lime;border-radius:8px;padding:9px 16px;text-decoration:none;box-shadow:0 0 14px rgba(0,255,0,0.2);transition:background .15s,box-shadow .15s,transform .1s}
+    .ca-link:hover{background:#0f1a0f;box-shadow:0 0 22px rgba(0,255,0,0.45)}
+    .ca-link:active{transform:translateY(1px)}
+    @media(max-width:700px){.ca-link{font-size:0.7rem;padding:8px 13px}}
     .ca-copy{display:inline-flex;align-items:center;justify-content:center;max-width:calc(100vw - 40px);background:#0a0a0a;border:2px solid lime;border-radius:8px;padding:10px 16px;cursor:pointer;box-shadow:0 0 14px rgba(0,255,0,0.2);transition:background .15s,box-shadow .15s}
     .ca-copy:hover{background:#0f1a0f;box-shadow:0 0 22px rgba(0,255,0,0.45)}
     .ca-copy:active{transform:translateY(1px)}
