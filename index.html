@@ -4,6 +4,23 @@
   <meta charset="UTF-8">
   <title>WICK.PICS</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="The front door of Green Wick — autonomous AI agents shipping onchain data APIs, prediction tools, and dozens of products. Home of $WICK on PulseChain. Never kill a frog's dog.">
+  <link rel="canonical" href="https://wick.pics/">
+  <meta name="theme-color" content="#00ff00">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="wick.pics">
+  <meta property="og:url" content="https://wick.pics/">
+  <meta property="og:title" content="wick.pics — Green Wick front door">
+  <meta property="og:description" content="Autonomous AI agents shipping onchain data APIs, prediction tools, and dozens of products. Home of $WICK on PulseChain. Never kill a frog's dog.">
+  <meta property="og:image" content="https://wick.pics/GreenWick.png">
+  <meta property="og:image:width" content="500">
+  <meta property="og:image:height" content="500">
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="wick.pics — Green Wick front door">
+  <meta name="twitter:description" content="Autonomous AI agents shipping onchain data APIs, prediction tools, and dozens of products. Home of $WICK on PulseChain.">
+  <meta name="twitter:image" content="https://wick.pics/GreenWick.png">
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Bungee+Shade&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <style>
@@ -565,7 +582,7 @@
         <span class="stats-chip"><b>15%</b> debugging</span>
       </div>
       <div class="stats-detail">
-        <span class="stats-chip"><b>91</b> projects</span>
+        <span class="stats-chip"><b>92</b> projects</span>
         <span class="stats-chip"><b>11</b> smart contracts</span>
       </div>
       <div class="stats-loc"><span class="stats-live-dot"></span><span id="locCount">107,000</span> lines of custom code</div>
@@ -599,8 +616,8 @@
     // Methodology: base hours per complexity tier + 30% research/learning +
     // 20% debugging/testing + 10% architecture/planning overhead.
     // A senior full-stack dev working solo would need all of this.
-    const DEV_HOURS_ESTIMATE = 12900;
-    const LOC_ESTIMATE = 446000;
+    const DEV_HOURS_ESTIMATE = 13150;
+    const LOC_ESTIMATE = 455000;
     function animateCount(el, target, prefix, duration) {
       const start = performance.now();
       function tick(now) {
@@ -673,6 +690,11 @@
       if (n >= 1e3) return (n / 1e3).toFixed(0) + 'K';
       return n.toFixed(0);
     }
+    function escHtml(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
 
     async function updatePools() {
       try {
@@ -698,12 +720,12 @@
           totalVol += volH24;
 
           const dexId = pair.dexId || 'unknown';
-          const dexName = DEX_NAMES[dexId] || dexId;
+          const dexName = escHtml(DEX_NAMES[dexId] || dexId);
           const dexColor = DEX_COLORS[dexId] || '#888';
           // Determine which side is WICK and which is the partner token
           const wickIsBase = pair.baseToken?.address?.toLowerCase() === ca;
           const partnerToken = wickIsBase ? pair.quoteToken : pair.baseToken;
-          const partnerSymbol = partnerToken?.symbol || partnerToken?.address?.slice(0, 8) || '???';
+          const partnerSymbol = escHtml(partnerToken?.symbol || partnerToken?.address?.slice(0, 8) || '???');
           const wickLiq = wickIsBase ? (pair.liquidity?.base || 0) : (pair.liquidity?.quote || 0);
           const partnerLiq = wickIsBase ? (pair.liquidity?.quote || 0) : (pair.liquidity?.base || 0);
           const lpLink = LP_LINKS[dexId];
