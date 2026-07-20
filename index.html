@@ -67,8 +67,8 @@
       margin-top: 30px;
       font-family: 'Bungee Shade', cursive;
       font-size: clamp(1.15rem, 4.6vw, 2.5rem);
-      color: #baffba;
-      text-shadow: 0 0 8px rgba(0, 255, 0, 0.55);
+      color: #ff3b3b;
+      text-shadow: 0 0 8px rgba(255, 40, 40, 0.6);
       letter-spacing: 0.08em;
     }
     .stats-box {
@@ -364,6 +364,16 @@
       if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(ca).then(done).catch(function(){fallback();done();}); }
       else { fallback(); done(); }
     }
+    // footer CA click-to-copy (Chef 2026-07-20): the footer contract line copies on click — no icon,
+    // looks identical at rest, just a brief "✓ copied!" flash then reverts.
+    function copyFooterCa(el){
+      var ca='0x8CDaf3d630Da9E1450832924D5701CC0500E9cfC';
+      var orig=el.textContent;
+      var done=function(){ el.textContent='✓ Copied!'; setTimeout(function(){ el.textContent=orig; },1400); };
+      var fallback=function(){ try{var ta=document.createElement('textarea');ta.value=ca;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.focus();ta.select();document.execCommand('copy');document.body.removeChild(ta);}catch(e){} };
+      if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(ca).then(done).catch(function(){fallback();done();}); }
+      else { fallback(); done(); }
+    }
   </script>
 
   <section class="site-frames" style="display:flex;flex-wrap:wrap;justify-content:center;gap:20px;padding:30px 20px;position:relative;z-index:2">
@@ -601,7 +611,7 @@
 
   <footer class="footer">
     <p>GREEN WICK ($WICK) on PulseChain</p>
-    <p class="contract">Contract: 0x8CDaf3d630Da9E1450832924D5701CC0500E9cfC</p>
+    <p class="contract" onclick="copyFooterCa(this)" style="cursor:pointer" title="Click to copy the $WICK contract address">Contract: 0x8CDaf3d630Da9E1450832924D5701CC0500E9cfC</p>
   </footer>
 
   <script>
