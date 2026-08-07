@@ -380,7 +380,7 @@
   <section class="news-strip" aria-label="Bullish news for $WICK">
     <div class="news-head">🟢 BULLISH NEWS FOR $WICK</div>
     <ul class="news-list" id="news-strip-list">
-      <li class="news-item"><div class="news-body"><div class="news-line" style="color:#666">Loading news…</div></div></li>
+      <li class="news-item"><span class="news-line" style="color:#666">Loading news…</span></li>
     </ul>
     <a class="news-more" href="/news">SHOW MORE →</a>
   </section>
@@ -388,22 +388,23 @@
     .news-strip{max-width:900px;margin:10px auto 0;background:#0a0a0a;border:2px solid lime;border-radius:8px;box-shadow:0 0 20px rgba(0,255,0,0.22);overflow:hidden;position:relative;z-index:2}
     .news-head{font-family:'Press Start 2P',cursive;font-size:0.72rem;letter-spacing:1px;color:#00ff00;padding:14px 16px;background:#111;border-bottom:2px solid #1f3f1f;text-shadow:0 0 8px rgba(0,255,0,0.5)}
     .news-list{list-style:none;margin:0;padding:0}
-    .news-item{display:flex;gap:14px;padding:13px 16px;border-bottom:1px solid #1a1a1a}
+    /* Desktop: date · line · links all on ONE row. Mobile: line on its own line, date+links below. */
+    .news-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #1a1a1a}
     .news-item:last-child{border-bottom:0}
-    .news-date{flex:0 0 auto;font-family:ui-monospace,'Courier New',monospace;font-size:0.62rem;color:#3fb950;letter-spacing:0.5px;white-space:nowrap;padding-top:3px}
-    .news-body{flex:1 1 auto;min-width:0}
-    .news-line{font-family:sans-serif;font-size:0.85rem;line-height:1.55;color:#e8e8e8}
-    .news-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-    .news-chip{display:inline-flex;align-items:center;font-family:ui-monospace,'Courier New',monospace;font-size:0.62rem;font-weight:700;color:#00ff00;background:#0a0a0a;border:1px solid lime;border-radius:6px;padding:4px 10px;text-decoration:none;transition:background .15s,box-shadow .15s}
+    .news-date{flex:0 0 auto;font-family:ui-monospace,'Courier New',monospace;font-size:0.62rem;color:#3fb950;letter-spacing:0.5px;white-space:nowrap}
+    .news-line{flex:1 1 auto;min-width:0;font-family:sans-serif;font-size:0.82rem;color:#e8e8e8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .news-links{flex:0 0 auto;display:flex;gap:8px}
+    .news-chip{display:inline-flex;align-items:center;font-family:ui-monospace,'Courier New',monospace;font-size:0.62rem;font-weight:700;color:#00ff00;background:#0a0a0a;border:1px solid lime;border-radius:6px;padding:4px 10px;text-decoration:none;white-space:nowrap;transition:background .15s,box-shadow .15s}
     .news-chip:hover{background:#0f1a0f;box-shadow:0 0 12px rgba(0,255,0,0.35)}
     .news-more{display:block;text-align:center;padding:13px;font-family:'Press Start 2P',cursive;font-size:0.6rem;letter-spacing:1px;color:#00ff00;background:#111;border-top:2px solid #1f3f1f;text-decoration:none;transition:background .15s}
     .news-more:hover{background:#0f1a0f;text-shadow:0 0 8px rgba(0,255,0,0.6)}
-    @media(max-width:700px){
-      .news-strip{max-width:calc(100vw - 40px)}
+    @media(max-width:640px){
+      .news-strip{max-width:calc(100vw - 24px)}
       .news-head{font-size:0.6rem}
-      .news-item{flex-direction:column;gap:6px}
-      .news-date{padding-top:0}
-      .news-line{font-size:0.8rem}
+      .news-item{flex-wrap:wrap;gap:7px 10px;padding:11px 13px}
+      .news-line{flex:1 1 100%;order:-1;font-size:0.8rem}
+      .news-links{margin-left:auto}
+      .news-date{font-size:0.56rem}
     }
   </style>
   <script>
@@ -414,15 +415,15 @@
       function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
       function renderItem(it){
         var chips = (it.links||[]).map(function(l){ return '<a class="news-chip" href="'+esc(l.url)+'" target="_blank" rel="noopener">'+esc(l.label)+' ↗</a>'; }).join('');
-        return '<li class="news-item"><div class="news-date">'+esc(it.date)+'</div><div class="news-body"><div class="news-line">'+esc(it.line)+'</div>'+(chips?'<div class="news-links">'+chips+'</div>':'')+'</div></li>';
+        return '<li class="news-item"><span class="news-date">'+esc(it.date)+'</span><span class="news-line">'+esc(it.line)+'</span>'+(chips?'<span class="news-links">'+chips+'</span>':'')+'</li>';
       }
       fetch('news.json').then(function(r){ return r.json(); }).then(function(items){
         var live = (items||[]).filter(function(it){ return it && !it.placeholder && it.line; });
         var top = live.slice(0, 5);
-        if(!top.length){ el.innerHTML = '<li class="news-item"><div class="news-body"><div class="news-line" style="color:#666">No news yet.</div></div></li>'; return; }
+        if(!top.length){ el.innerHTML = '<li class="news-item"><span class="news-line" style="color:#666">No news yet.</span></li>'; return; }
         el.innerHTML = top.map(renderItem).join('');
       }).catch(function(){
-        el.innerHTML = '<li class="news-item"><div class="news-body"><div class="news-line" style="color:#666">News feed unavailable right now.</div></div></li>';
+        el.innerHTML = '<li class="news-item"><span class="news-line" style="color:#666">News feed unavailable right now.</span></li>';
       });
     })();
   </script>
