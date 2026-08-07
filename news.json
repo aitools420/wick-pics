@@ -1,0 +1,81 @@
+[
+  {
+    "date": "2026-08-07",
+    "line": "The Zero Human Company shipped its first customer site — an AI-run company turned a prompt and a $5 payment into a world-class token site.",
+    "links": [
+      { "label": "See it", "url": "https://daisy.wick.pics" },
+      { "label": "The company", "url": "https://zhc.wick.pics" }
+    ]
+  },
+  {
+    "date": "2026-08-06",
+    "line": "Grid bots are coming to NOXABOT — non-custodial buy-the-dips, sell-the-bounces, one signature and your keys never leave your wallet.",
+    "links": [
+      { "label": "Grid", "url": "https://noxa.bot/grid" },
+      { "label": "NOXABOT", "url": "https://noxa.bot" }
+    ]
+  },
+  {
+    "date": "2026-08-05",
+    "line": "A free, non-custodial launch sniper for everyone — snipe new token launches on-chain; nobody ever holds your funds.",
+    "links": [
+      { "label": "Try it", "url": "https://noxa.bot" }
+    ]
+  },
+  {
+    "date": "2026-08-04",
+    "line": "NOXABOT revenue has bought $WICK — real bot fees routed into $WICK buybacks.",
+    "links": [
+      { "label": "NOXABOT", "url": "https://noxa.bot" }
+    ]
+  },
+  {
+    "date": "2026-08-03",
+    "line": "swap.wick.pics/real — a zero-fee DEX aggregator on PulseChain: every route priced side by side, you sign, we skim nothing.",
+    "links": [
+      { "label": "Swap", "url": "https://swap.wick.pics/real" }
+    ]
+  },
+  {
+    "date": "2026-08-01",
+    "line": "legit.wick.pics — an AI crawls the internet every night and showcases the best-built sites it finds.",
+    "links": [
+      { "label": "See it", "url": "https://legit.wick.pics" }
+    ]
+  },
+  {
+    "date": "2026-07-30",
+    "line": "KJP: The Black File — a Kenny John Pierre game, live.",
+    "links": [
+      { "label": "Play", "url": "https://kjp.wick.pics" }
+    ]
+  },
+  {
+    "date": "2026-07-28",
+    "line": "PEPE WICK: Arcade Alley — a WICK arcade game, live.",
+    "links": [
+      { "label": "Play", "url": "https://games.wick.pics" }
+    ]
+  },
+  {
+    "date": "2026-07-26",
+    "line": "WICK Arsenal — mintable Gun NFTs for the games.",
+    "links": [
+      { "label": "Mint", "url": "https://arsenal.wick.pics" }
+    ]
+  },
+  {
+    "date": "2026-07-20",
+    "line": "We built the Golden Coins community their whole site.",
+    "links": [
+      { "label": "See it", "url": "https://gold.wick.pics" }
+    ]
+  },
+  {
+    "_comment": "PLACEHOLDER — future rh.wick.pics entry. Owner to supply date, line, and links. Items with \"placeholder\": true are NOT rendered on the site.",
+    "placeholder": true,
+    "date": "",
+    "line": "",
+    "links": []
+  }
+]

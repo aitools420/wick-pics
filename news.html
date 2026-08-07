@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BULLISH NEWS FOR $WICK — wick.pics</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Bullish news for $WICK — every honest, provable win from Green Wick, most recent first. Never kill a frog's dog.">
+  <link rel="canonical" href="https://wick.pics/news">
+  <meta name="theme-color" content="#00ff00">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="wick.pics">
+  <meta property="og:url" content="https://wick.pics/news">
+  <meta property="og:title" content="🟢 BULLISH NEWS FOR $WICK">
+  <meta property="og:description" content="Every honest, provable win from Green Wick, most recent first.">
+  <meta property="og:image" content="https://wick.pics/GreenWick.png">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Bungee+Shade&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { overflow-x: clip; }
+    body {
+      background: linear-gradient(45deg, #000, #0a0a0a, #111);
+      color: #fff;
+      font-family: 'Press Start 2P', cursive;
+      min-height: 100vh;
+    }
+    .psychedelic-bg {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(0,255,0,0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(255,0,255,0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 90%, rgba(0,255,255,0.1) 0%, transparent 50%);
+      animation: psychedelic 10s infinite alternate;
+      z-index: -1;
+      pointer-events: none;
+    }
+    @keyframes psychedelic {
+      0% { filter: hue-rotate(0deg) blur(0px); }
+      100% { filter: hue-rotate(360deg) blur(2px); }
+    }
+    header {
+      text-align: center;
+      padding: 40px 20px 26px;
+      border-bottom: 4px solid lime;
+    }
+    .back {
+      display: inline-block;
+      font-family: ui-monospace, 'Courier New', monospace;
+      font-size: 0.72rem;
+      color: #3fb950;
+      text-decoration: none;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+    }
+    .back:hover { color: #00ff00; text-shadow: 0 0 6px rgba(0,255,0,0.6); }
+    h1 {
+      font-family: 'Bungee Shade', cursive;
+      font-size: clamp(1.4rem, 6vw, 3rem);
+      color: #00ff00;
+      text-shadow: 0 0 10px rgba(0, 255, 0, 0.7);
+      line-height: 1.1;
+      overflow-wrap: break-word;
+      word-break: break-word;
+      max-width: 100%;
+    }
+    .sub {
+      margin-top: 16px;
+      font-family: ui-monospace, 'Courier New', monospace;
+      font-size: 0.7rem;
+      color: #888;
+      letter-spacing: 1px;
+    }
+    .sub .dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      background: lime; border-radius: 50%;
+      margin-right: 6px;
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+    @keyframes pulse-glow { 0%,100%{opacity:.5} 50%{opacity:1} }
+    main {
+      max-width: 760px;
+      margin: 26px auto 0;
+      padding: 0 20px;
+      position: relative;
+      z-index: 2;
+    }
+    .news-feed {
+      background: #0a0a0a;
+      border: 2px solid lime;
+      border-radius: 8px;
+      box-shadow: 0 0 26px rgba(0,255,0,0.15);
+      overflow: hidden;
+    }
+    .news-list { list-style: none; margin: 0; padding: 0; }
+    .news-item {
+      display: flex;
+      gap: 16px;
+      padding: 16px 18px;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    .news-item:last-child { border-bottom: 0; }
+    .news-item:hover { background: #0d0d0d; }
+    .news-date {
+      flex: 0 0 auto;
+      font-family: ui-monospace, 'Courier New', monospace;
+      font-size: 0.66rem;
+      color: #3fb950;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      padding-top: 3px;
+    }
+    .news-body { flex: 1 1 auto; min-width: 0; }
+    .news-line {
+      font-family: sans-serif;
+      font-size: 0.92rem;
+      line-height: 1.55;
+      color: #e8e8e8;
+    }
+    .news-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .news-chip {
+      display: inline-flex;
+      align-items: center;
+      font-family: ui-monospace, 'Courier New', monospace;
+      font-size: 0.64rem;
+      font-weight: 700;
+      color: #00ff00;
+      background: #0a0a0a;
+      border: 1px solid lime;
+      border-radius: 6px;
+      padding: 5px 11px;
+      text-decoration: none;
+      transition: background .15s, box-shadow .15s;
+    }
+    .news-chip:hover { background: #0f1a0f; box-shadow: 0 0 12px rgba(0,255,0,0.35); }
+    .news-empty { padding: 40px 20px; text-align: center; color: #666; font-family: ui-monospace, monospace; font-size: 0.8rem; }
+    footer {
+      text-align: center;
+      padding: 30px 20px 40px;
+      font-size: 0.6rem;
+      color: #666;
+    }
+    footer a { color: #3fb950; text-decoration: none; }
+    footer a:hover { color: #00ff00; }
+    @media (max-width: 700px) {
+      .news-item { flex-direction: column; gap: 6px; }
+      .news-date { padding-top: 0; }
+      .news-line { font-size: 0.88rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="psychedelic-bg"></div>
+
+  <header>
+    <a class="back" href="/">← wick.pics</a>
+    <h1>🟢 BULLISH NEWS FOR $WICK</h1>
+    <p class="sub"><span class="dot"></span>Every win, honest and provable. Most recent first.</p>
+  </header>
+
+  <main>
+    <div class="news-feed">
+      <ul class="news-list" id="news-full-list">
+        <li class="news-empty">Loading news…</li>
+      </ul>
+    </div>
+  </main>
+
+  <footer>
+    <p>GREEN WICK ($WICK) on PulseChain · <a href="/">back to the hub</a></p>
+  </footer>
+
+  <script>
+    // Full feed — renders every live item from news.json (the single source of truth,
+    // shared with the strip on the hub). Placeholder items are skipped.
+    (function(){
+      var el = document.getElementById('news-full-list');
+      if(!el) return;
+      function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+      function renderItem(it){
+        var chips = (it.links||[]).map(function(l){ return '<a class="news-chip" href="'+esc(l.url)+'" target="_blank" rel="noopener">'+esc(l.label)+' ↗</a>'; }).join('');
+        return '<li class="news-item"><div class="news-date">'+esc(it.date)+'</div><div class="news-body"><div class="news-line">'+esc(it.line)+'</div>'+(chips?'<div class="news-links">'+chips+'</div>':'')+'</div></li>';
+      }
+      fetch('news.json').then(function(r){ return r.json(); }).then(function(items){
+        var live = (items||[]).filter(function(it){ return it && !it.placeholder && it.line; });
+        if(!live.length){ el.innerHTML = '<li class="news-empty">No news yet — check back soon.</li>'; return; }
+        el.innerHTML = live.map(renderItem).join('');
+      }).catch(function(){
+        el.innerHTML = '<li class="news-empty">News feed unavailable right now. Try again shortly.</li>';
+      });
+    })();
+  </script>
+</body>
+</html>
