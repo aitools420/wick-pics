@@ -97,12 +97,27 @@
     .news-list { list-style: none; margin: 0; padding: 0; }
     .news-item {
       display: flex;
-      gap: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 16px;
       padding: 16px 18px;
       border-bottom: 1px solid #1a1a1a;
     }
     .news-item:last-child { border-bottom: 0; }
     .news-item:hover { background: #0d0d0d; }
+    .news-line {
+      flex: 1 1 320px;
+      min-width: 0;
+      font-family: sans-serif;
+      font-size: 0.92rem;
+      line-height: 1.55;
+      color: #e8e8e8;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    /* buttons + date ride the end of the line, and wrap together below the description
+       the moment the row runs out of width (Chef 2026-08-08) */
+    .news-meta { flex: 0 0 auto; display: flex; align-items: center; gap: 12px; }
+    .news-links { display: flex; flex-wrap: wrap; gap: 8px; }
     .news-date {
       flex: 0 0 auto;
       font-family: ui-monospace, 'Courier New', monospace;
@@ -110,15 +125,7 @@
       color: #3fb950;
       letter-spacing: 0.5px;
       white-space: nowrap;
-      padding-top: 3px;
     }
-    .news-body { flex: 1 1 auto; min-width: 0; }
-    .news-line {
-      font-family: sans-serif;
-      font-size: 0.92rem;
-      line-height: 1.55;
-      color: #e8e8e8;;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .news-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
     .news-chip {
       display: inline-flex;
       align-items: center;
@@ -143,10 +150,9 @@
     }
     footer a { color: #3fb950; text-decoration: none; }
     footer a:hover { color: #00ff00; }
-    @media (max-width: 700px) {
-      .news-item { flex-direction: column; gap: 6px; }
-      .news-date { padding-top: 0; }
-      .news-line { font-size: 0.88rem; }
+    @media (max-width: 560px) {
+      .news-line { font-size: 0.88rem; white-space: normal; }
+      .news-chip { font-size: 0.6rem; padding: 4px 9px; }
     }
   </style>
 </head>
@@ -180,7 +186,7 @@
       function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
       function renderItem(it){
         var chips = (it.links||[]).map(function(l){ return '<a class="news-chip" href="'+esc(l.url)+'" target="_blank" rel="noopener">'+esc(l.label)+' ↗</a>'; }).join('');
-        return '<li class="news-item"><div class="news-date">'+esc(it.date)+'</div><div class="news-body"><div class="news-line">'+esc(it.line)+'</div>'+(chips?'<div class="news-links">'+chips+'</div>':'')+'</div></li>';
+        return '<li class="news-item"><div class="news-line">'+esc(it.line)+'</div><div class="news-meta">'+(chips?'<div class="news-links">'+chips+'</div>':'')+'<div class="news-date">'+esc(it.date)+'</div></div></li>';
       }
       fetch('news.json').then(function(r){ return r.json(); }).then(function(items){
         var live = (items||[]).filter(function(it){ return it && !it.placeholder && it.line; });
