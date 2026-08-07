@@ -38,16 +38,6 @@
     ]
   },
   {
-    "date": "2026-08-04",
-    "line": "NOXABOT fees are buying $WICK.",
-    "links": [
-      {
-        "label": "NOXABOT",
-        "url": "https://noxa.bot"
-      }
-    ]
-  },
-  {
     "date": "2026-08-03",
     "line": "swap.wick.pics/real: zero-fee swaps.",
     "links": [
@@ -94,6 +84,16 @@
       {
         "label": "Mint",
         "url": "https://arsenal.wick.pics"
+      }
+    ]
+  },
+  {
+    "date": "2026-07-22",
+    "line": "NOXABOT fees are buying $WICK.",
+    "links": [
+      {
+        "label": "NOXABOT",
+        "url": "https://noxa.bot"
       }
     ]
   },
