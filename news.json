@@ -49,16 +49,6 @@
   },
   {
     "date": "2026-08-04",
-    "line": "swap.wick.pics/real: zero-fee swaps.",
-    "links": [
-      {
-        "label": "Swap",
-        "url": "https://swap.wick.pics/real"
-      }
-    ]
-  },
-  {
-    "date": "2026-08-04",
     "line": "A tool to batch revoke the token approvals that drain wallets.",
     "links": [
       {
