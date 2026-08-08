@@ -59,7 +59,7 @@
   },
   {
     "date": "2026-08-04",
-    "line": "A free tool to revoke the token approvals that drain wallets.",
+    "line": "A tool to batch revoke the token approvals that drain wallets.",
     "links": [
       {
         "label": "Revoke",
