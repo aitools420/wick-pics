@@ -1,5 +1,15 @@
 [
   {
+    "date": "2026-08-08",
+    "line": "A critical security site for all of crypto — the $116M Coldcard hack in plain words.",
+    "links": [
+      {
+        "label": "Read it",
+        "url": "https://security.wick.pics"
+      }
+    ]
+  },
+  {
     "date": "2026-08-07",
     "line": "First AI-built customer site is live.",
     "links": [
@@ -48,6 +58,16 @@
     ]
   },
   {
+    "date": "2026-08-04",
+    "line": "A free tool to revoke the token approvals that drain wallets.",
+    "links": [
+      {
+        "label": "Revoke",
+        "url": "https://revoke.wick.pics"
+      }
+    ]
+  },
+  {
     "date": "2026-07-31",
     "line": "AI awards the web's best sites nightly.",
     "links": [
@@ -78,6 +98,16 @@
     ]
   },
   {
+    "date": "2026-07-29",
+    "line": "Shareable flex cards for your PulseChain wins.",
+    "links": [
+      {
+        "label": "Flex",
+        "url": "https://flex.wick.pics"
+      }
+    ]
+  },
+  {
     "date": "2026-07-26",
     "line": "WICK Arsenal: mintable Gun NFTs.",
     "links": [
@@ -104,6 +134,16 @@
       {
         "label": "The company",
         "url": "https://zhc.wick.pics"
+      }
+    ]
+  },
+  {
+    "date": "2026-06-22",
+    "line": "The case for sovereign Australian frontier AI.",
+    "links": [
+      {
+        "label": "Read it",
+        "url": "https://aus.wick.pics"
       }
     ]
   },
