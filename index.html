@@ -612,76 +612,12 @@
     </div>
   </section>
 
-  <div class="stats-box">
-    <div class="stats-left">
-      <h2>Equivalent Human&nbsp;Hours</h2>
-      <p>Automated processing cycles converted to human manual labor metrics. The efficiency of AI agents measured in biological time.</p>
-      <div class="stats-detail">
-        <span class="stats-chip"><b>20%</b> research</span>
-        <span class="stats-chip"><b>15%</b> architecture</span>
-      </div>
-      <div class="stats-detail">
-        <span class="stats-chip"><b>50%</b> coding</span>
-        <span class="stats-chip"><b>15%</b> debugging</span>
-      </div>
-      <div class="stats-detail">
-        <span class="stats-chip"><b>120</b> projects</span>
-        <span class="stats-chip"><b>11</b> smart contracts</span>
-      </div>
-      <div class="stats-loc"><span class="stats-live-dot"></span><span id="locCount">107,000</span> lines of custom code</div>
-    </div>
-    <div class="stats-right">
-      <div class="stats-equiv">
-        <span><b id="eqDays">0</b> days</span> · <span><b id="eqWeeks">0</b> weeks</span> · <span><b id="eqYears">0</b> years</span>
-      </div>
-      <div class="stat-item">
-        <div class="stat-number green" id="devCount">0</div>
-        <div class="stat-label">Dev Hours Saved</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-number magenta" id="projectCount">27</div>
-        <div class="stat-label">Projects Shipped</div>
-      </div>
-    </div>
-  </div>
-
   <footer class="footer">
     <p>GREEN WICK ($WICK) on PulseChain</p>
     <p class="contract" onclick="copyFooterCa(this)" style="cursor:pointer" title="Click to copy the $WICK contract address">Contract: 0x8CDaf3d630Da9E1450832924D5701CC0500E9cfC</p>
   </footer>
 
   <script>
-    // Dev hours estimate — based on real project inventory:
-    // 21 project dirs, ~107K lines custom code, 11 smart contracts, 14 subdomains,
-    // 3 data pipelines, 5 DEX aggregator integrations, 3 blockchain deployments,
-    // LLM-powered apps, Telegram bots, portfolio tracker, and infrastructure.
-    //
-    // Methodology: base hours per complexity tier + 30% research/learning +
-    // 20% debugging/testing + 10% architecture/planning overhead.
-    // A senior full-stack dev working solo would need all of this.
-    const DEV_HOURS_ESTIMATE = 17300;
-    const LOC_ESTIMATE = 598000;
-    function animateCount(el, target, prefix, duration) {
-      const start = performance.now();
-      function tick(now) {
-        const t = Math.min((now - start) / duration, 1);
-        const ease = 1 - Math.pow(1 - t, 3);
-        el.textContent = (prefix || '') + Math.round(ease * target).toLocaleString();
-        if (t < 1) requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
-    }
-    animateCount(document.getElementById('devCount'), DEV_HOURS_ESTIMATE, '~', 2200);
-    animateCount(document.getElementById('locCount'), LOC_ESTIMATE, '', 2600);
-
-    // Equivalent time breakdowns (8-hour working days)
-    const days = Math.round(DEV_HOURS_ESTIMATE / 8);
-    const weeks = Math.round(days / 5);
-    const years = (DEV_HOURS_ESTIMATE / 2080).toFixed(1);
-    document.getElementById('eqDays').textContent = days.toLocaleString();
-    document.getElementById('eqWeeks').textContent = weeks.toLocaleString();
-    document.getElementById('eqYears').textContent = years;
-
     // Live $WICK price ticker from DexScreener
     async function updatePrice() {
       const ticker = document.getElementById('ticker');
