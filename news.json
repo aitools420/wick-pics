@@ -1,7 +1,17 @@
 [
   {
+    "date": "2026-08-25",
+    "line": "The WICK Agentic network moves to pangle.online",
+    "links": [
+      {
+        "label": "Enter",
+        "url": "https://pangle.online"
+      }
+    ]
+  },
+  {
     "date": "2026-08-24",
-    "line": "Dust sweeper: a big usability pass — clearer steps.",
+    "line": "Dust sweeper: a big usability pass (UI/UX).",
     "links": [
       {
         "label": "Sweep dust",
