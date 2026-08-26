@@ -66,7 +66,14 @@
     .slogan {
       margin-top: 30px;
       font-family: 'Bungee Shade', cursive;
-      font-size: clamp(1.15rem, 4.6vw, 2.5rem);
+      /* One line on every phone (Chef, 2026-08-26). It used to wrap at EVERY width from
+         320px up, because the clamp floor of 1.15rem outran the 4.6vw scale on small
+         screens and the floor always won. Measured at 320px: the container is 280px and
+         the line fits up to 14px, so the scale is set from the narrowest phone rather
+         than guessed, and the floor is dropped below what that scale ever produces.
+         nowrap makes a regression obvious (it would overflow) instead of silent. */
+      font-size: clamp(0.72rem, 4.1vw, 2.5rem);
+      white-space: nowrap;
       color: #ff3b3b;
       text-shadow: 0 0 8px rgba(255, 40, 40, 0.6);
       letter-spacing: 0.08em;
