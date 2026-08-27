@@ -680,9 +680,14 @@
     // pool live and shows what is in it, what it is worth and what is moving through it.
     // Slug is <dex>-<partner>-<version>, resolved on that page by listing WICK's pools —
     // no mapping to maintain, so a pool created tomorrow is linkable tomorrow.
+    // WICK_CA lives HERE, at module scope. Reaching for the `ca` that is declared inside the
+    // fetch function threw ReferenceError on the first row, the whole render aborted, and the
+    // table sat on "Loading pools..." — a helper that reads a caller's local is a helper that
+    // works until the day it is called from somewhere else.
+    const WICK_CA = '0x8CDaf3d630Da9E1450832924D5701CC0500E9cfC'.toLowerCase();
     function poolSlug(pair) {
       const ver = ((pair.labels || [])[0] || '').toLowerCase();
-      const wickIsBase = pair.baseToken?.address?.toLowerCase() === ca;
+      const wickIsBase = pair.baseToken?.address?.toLowerCase() === WICK_CA;
       const partner = wickIsBase ? pair.quoteToken : pair.baseToken;
       const sym = (partner?.symbol || '?').toLowerCase().replace(/[^a-z0-9]/g, '');
       return [pair.dexId || 'dex', sym, ver].filter(Boolean).join('-');
@@ -714,79 +719,103 @@
       });
     }
 
+    // NEVER SHOW A BARE "Loading pools…". The last good answer is kept in the browser and
+    // painted the instant the page opens, then quietly replaced when the fresh one lands. A
+    // reader should see the previous state while we refresh, not an empty box — and if the
+    // price feed is down or slow, they still see the table instead of a spinner that never ends.
+    const LP_CACHE = 'wick.lp.pairs.v1';
+    function cachedPools() {
+      try {
+        const raw = localStorage.getItem(LP_CACHE);
+        if (!raw) return null;
+        const c = JSON.parse(raw);
+        return (c && Array.isArray(c.pairs) && c.pairs.length) ? c : null;
+      } catch (e) { return null; }
+    }
+
     async function updatePools() {
+      const cached = cachedPools();
+      if (cached) drawPools(cached.pairs);               // paint the last good answer first
       try {
         const ca = '0x8CDaf3d630Da9E1450832924D5701CC0500E9cfC'.toLowerCase();
         const resp = await fetch('https://api.dexscreener.com/latest/dex/tokens/' + ca);
         const data = await resp.json();
         const pairs = (data.pairs || []).filter(p => p.chainId === 'pulsechain');
-        if (pairs.length === 0) return;
-
-        // Sort by liquidity descending
-        pairs.sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0));
-
-        const body = document.getElementById('lp-body');
-        const foot = document.getElementById('lp-foot');
-        let totalLiq = 0, totalVol = 0;
-        let rows = '';
-
-        for (const pair of pairs) {
-          const liqUsd = pair.liquidity?.usd || 0;
-          if (liqUsd < 1) continue; // skip dead pools
-          const volH24 = pair.volume?.h24 || 0;
-          totalLiq += liqUsd;
-          totalVol += volH24;
-
-          const dexId = pair.dexId || 'unknown';
-          const dexName = escHtml(dexLabel(pair));
-          const dexColor = DEX_COLORS[dexId] || '#888';
-          const poolUrl = poolLink(pair);
-          // Determine which side is WICK and which is the partner token
-          const wickIsBase = pair.baseToken?.address?.toLowerCase() === ca;
-          const partnerToken = wickIsBase ? pair.quoteToken : pair.baseToken;
-          const partnerSymbol = escHtml(partnerToken?.symbol || partnerToken?.address?.slice(0, 8) || '???');
-          const wickLiq = wickIsBase ? (pair.liquidity?.base || 0) : (pair.liquidity?.quote || 0);
-          const partnerLiq = wickIsBase ? (pair.liquidity?.quote || 0) : (pair.liquidity?.base || 0);
-          const dsLink = pair.url || 'https://dexscreener.com/pulsechain/' + pair.pairAddress;
-
-          rows += '<tr style="border-bottom:1px solid #1f1f1f;transition:background 0.15s" onmouseenter="this.style.background=\'#1a1a1a\'" onmouseleave="this.style.background=\'transparent\'">';
-          rows += '<td style="padding:14px 16px;text-align:left"><span style="color:#fff;font-weight:bold">WICK</span><span style="color:#555"> / </span><span style="color:#ccc">' + partnerSymbol + '</span>';
-          rows += '<div style="color:#555;font-size:0.6rem;margin-top:3px">' + fmtTokens(wickLiq) + ' WICK / ' + fmtTokens(partnerLiq) + ' ' + partnerSymbol + '</div></td>';
-          rows += '<td style="padding:14px 16px;text-align:right;color:lime;font-weight:bold">' + fmtUsd(liqUsd) + '</td>';
-          rows += '<td style="padding:14px 16px;text-align:right;color:#ccc" class="lp-hide-mobile">' + fmtUsd(volH24) + '</td>';
-          rows += '<td style="padding:14px 16px;text-align:right;white-space:nowrap">';
-          const badge = '<span style="display:inline-block;padding:4px 10px;border-radius:12px;font-size:0.6rem;font-weight:bold;color:#000;background:' + dexColor + ';margin-right:6px">' + dexName + '</span>';
-          rows += poolUrl
-            ? '<a href="' + poolUrl + '" target="_blank" rel="noopener" title="open this pool on ' + dexName + '" style="text-decoration:none">' + badge + '</a>'
-            : badge;
-          rows += ' <a href="' + dsLink + '" target="_blank" rel="noopener" style="display:inline-block;padding:4px 8px;border-radius:12px;font-size:0.55rem;color:#888;border:1px solid #333;text-decoration:none;transition:all 0.2s" onmouseenter="this.style.borderColor=\'#555\'" onmouseleave="this.style.borderColor=\'#333\'">chart</a>';
-          rows += '</td></tr>';
-        }
-
-        if (rows) {
-          body.innerHTML = rows;
-          foot.style.display = '';
-          document.getElementById('lp-total-liq').textContent = fmtUsd(totalLiq);
-          document.getElementById('lp-total-vol').textContent = fmtUsd(totalVol);
-
-          // Show only top 6, hide the rest
-          const allRows = body.querySelectorAll('tr');
-          const LP_VISIBLE = 6;
-          const showAllRow = document.getElementById('lp-show-all-row');
-          const showAllBtn = document.getElementById('lp-show-all-btn');
-          if (allRows.length > LP_VISIBLE) {
-            const expanded = showAllBtn.dataset.expanded === '1';
-            for (let i = LP_VISIBLE; i < allRows.length; i++) {
-              allRows[i].style.display = expanded ? '' : 'none';
-            }
-            showAllRow.style.display = '';
-            showAllBtn.textContent = expanded ? 'SHOW LESS' : 'SHOW ALL LIQUIDITY POOLS (' + allRows.length + ')';
-          } else {
-            showAllRow.style.display = 'none';
-          }
-        }
+        if (pairs.length === 0) return;                  // keep whatever is on screen
+        try { localStorage.setItem(LP_CACHE, JSON.stringify({at: Date.now(), pairs: pairs})); } catch (e) {}
+        drawPools(pairs);
       } catch (e) {
-        console.warn('LP fetch failed:', e);
+        // A failed refresh must never wipe a good table — but it must not hide either. This
+        // catch once swallowed a ReferenceError from the RENDER as a warning, so the table sat
+        // on "Loading pools..." with a clean-looking console. Log it as an error, and say which
+        // half broke.
+        console.error('LP update failed (fetch or render); table left as-is:', e);
+      }
+    }
+
+    function drawPools(pairs) {
+      // Sort by liquidity descending
+      pairs.sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0));
+
+      const body = document.getElementById('lp-body');
+      const foot = document.getElementById('lp-foot');
+      let totalLiq = 0, totalVol = 0;
+      let rows = '';
+
+      for (const pair of pairs) {
+        const liqUsd = pair.liquidity?.usd || 0;
+        if (liqUsd < 1) continue; // skip dead pools
+        const volH24 = pair.volume?.h24 || 0;
+        totalLiq += liqUsd;
+        totalVol += volH24;
+
+        const dexId = pair.dexId || 'unknown';
+        const dexName = escHtml(dexLabel(pair));
+        const dexColor = DEX_COLORS[dexId] || '#888';
+        const poolUrl = poolLink(pair);
+        // Determine which side is WICK and which is the partner token
+        const wickIsBase = pair.baseToken?.address?.toLowerCase() === WICK_CA;
+        const partnerToken = wickIsBase ? pair.quoteToken : pair.baseToken;
+        const partnerSymbol = escHtml(partnerToken?.symbol || partnerToken?.address?.slice(0, 8) || '???');
+        const wickLiq = wickIsBase ? (pair.liquidity?.base || 0) : (pair.liquidity?.quote || 0);
+        const partnerLiq = wickIsBase ? (pair.liquidity?.quote || 0) : (pair.liquidity?.base || 0);
+        const dsLink = pair.url || 'https://dexscreener.com/pulsechain/' + pair.pairAddress;
+
+        rows += '<tr style="border-bottom:1px solid #1f1f1f;transition:background 0.15s" onmouseenter="this.style.background=\'#1a1a1a\'" onmouseleave="this.style.background=\'transparent\'">';
+        rows += '<td style="padding:14px 16px;text-align:left"><span style="color:#fff;font-weight:bold">WICK</span><span style="color:#555"> / </span><span style="color:#ccc">' + partnerSymbol + '</span>';
+        rows += '<div style="color:#555;font-size:0.6rem;margin-top:3px">' + fmtTokens(wickLiq) + ' WICK / ' + fmtTokens(partnerLiq) + ' ' + partnerSymbol + '</div></td>';
+        rows += '<td style="padding:14px 16px;text-align:right;color:lime;font-weight:bold">' + fmtUsd(liqUsd) + '</td>';
+        rows += '<td style="padding:14px 16px;text-align:right;color:#ccc" class="lp-hide-mobile">' + fmtUsd(volH24) + '</td>';
+        rows += '<td style="padding:14px 16px;text-align:right;white-space:nowrap">';
+        const badge = '<span style="display:inline-block;padding:4px 10px;border-radius:12px;font-size:0.6rem;font-weight:bold;color:#000;background:' + dexColor + ';margin-right:6px">' + dexName + '</span>';
+        rows += poolUrl
+          ? '<a href="' + poolUrl + '" target="_blank" rel="noopener" title="open this pool on ' + dexName + '" style="text-decoration:none">' + badge + '</a>'
+          : badge;
+        rows += ' <a href="' + dsLink + '" target="_blank" rel="noopener" style="display:inline-block;padding:4px 8px;border-radius:12px;font-size:0.55rem;color:#888;border:1px solid #333;text-decoration:none;transition:all 0.2s" onmouseenter="this.style.borderColor=\'#555\'" onmouseleave="this.style.borderColor=\'#333\'">chart</a>';
+        rows += '</td></tr>';
+      }
+
+      if (rows) {
+        body.innerHTML = rows;
+        foot.style.display = '';
+        document.getElementById('lp-total-liq').textContent = fmtUsd(totalLiq);
+        document.getElementById('lp-total-vol').textContent = fmtUsd(totalVol);
+
+        // Show only top 6, hide the rest
+        const allRows = body.querySelectorAll('tr');
+        const LP_VISIBLE = 6;
+        const showAllRow = document.getElementById('lp-show-all-row');
+        const showAllBtn = document.getElementById('lp-show-all-btn');
+        if (allRows.length > LP_VISIBLE) {
+          const expanded = showAllBtn.dataset.expanded === '1';
+          for (let i = LP_VISIBLE; i < allRows.length; i++) {
+            allRows[i].style.display = expanded ? '' : 'none';
+          }
+          showAllRow.style.display = '';
+          showAllBtn.textContent = expanded ? 'SHOW LESS' : 'SHOW ALL LIQUIDITY POOLS (' + allRows.length + ')';
+        } else {
+          showAllRow.style.display = 'none';
+        }
       }
     }
 
