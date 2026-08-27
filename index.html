@@ -656,12 +656,32 @@
     setInterval(updatePrice, 60000);
 
     // Active Liquidity Pools — fetches from DexScreener
-    const DEX_NAMES = { pulsex_v1: 'PulseX V1', pulsex_v2: 'PulseX V2', '9mm': '9mm', '9inch': '9inch' };
-    const DEX_COLORS = { pulsex_v1: '#00ff00', pulsex_v2: '#ff00ff', '9mm': '#00ffff', '9inch': '#ff8c00' };
-    const LP_LINKS = {
-      pulsex_v1: 'https://app.v1.pulsex.com/add/',
-      pulsex_v2: 'https://app.pulsex.com/add/',
-    };
+    // DexScreener returns dexId + a separate labels array — 'pulsex' with labels ['v2'],
+    // '9mm' with labels ['V3'] — NOT the pulsex_v1/pulsex_v2 keys this map used to assume.
+    // Nothing matched, so every badge rendered the raw id and the LP button never appeared.
+    const DEX_NAMES = { pulsex: 'PulseX', '9mm': '9mm', '9inch': '9inch', 'liberty-swap': 'Liberty' };
+    const DEX_COLORS = { pulsex: '#00ff00', '9mm': '#00ffff', '9inch': '#ff8c00', 'liberty-swap': '#ffd166' };
+    // The badge links to the POOL. For a V3 pool you cannot link "the LP" — the liquidity is
+    // split across position NFTs — but the pool itself is one contract with one address, and
+    // its page is what someone clicking a DEX badge actually wants.
+    //   9mm  — its own info page, checked against a bogus address: the real one renders the
+    //          pair and its liquidity, the fake one does not.
+    //   rest — the pair CONTRACT on the explorer. PulseX no longer has a stable web target:
+    //          app.pulsex.com is now a launcher page, its old /add/ route 404s, and the app
+    //          itself is pinned per-release on IPFS, so any deep link there rots at the next
+    //          version. The contract address never moves.
+    function dexLabel(pair) {
+      const base = DEX_NAMES[pair.dexId] || pair.dexId || 'unknown';
+      const ver = (pair.labels || [])[0];
+      return ver ? base + ' ' + ver.toUpperCase() : base;
+    }
+    function poolLink(pair) {
+      const addr = pair.pairAddress;
+      if (!addr) return '';
+      return pair.dexId === '9mm'
+        ? 'https://dex.9mm.pro/info/pairs/' + addr
+        : 'https://otter.pulsechain.com/address/' + addr;
+    }
 
     function fmtUsd(n) {
       if (n == null) return '$0';
@@ -706,15 +726,15 @@
           totalVol += volH24;
 
           const dexId = pair.dexId || 'unknown';
-          const dexName = escHtml(DEX_NAMES[dexId] || dexId);
+          const dexName = escHtml(dexLabel(pair));
           const dexColor = DEX_COLORS[dexId] || '#888';
+          const poolUrl = poolLink(pair);
           // Determine which side is WICK and which is the partner token
           const wickIsBase = pair.baseToken?.address?.toLowerCase() === ca;
           const partnerToken = wickIsBase ? pair.quoteToken : pair.baseToken;
           const partnerSymbol = escHtml(partnerToken?.symbol || partnerToken?.address?.slice(0, 8) || '???');
           const wickLiq = wickIsBase ? (pair.liquidity?.base || 0) : (pair.liquidity?.quote || 0);
           const partnerLiq = wickIsBase ? (pair.liquidity?.quote || 0) : (pair.liquidity?.base || 0);
-          const lpLink = LP_LINKS[dexId];
           const dsLink = pair.url || 'https://dexscreener.com/pulsechain/' + pair.pairAddress;
 
           rows += '<tr style="border-bottom:1px solid #1f1f1f;transition:background 0.15s" onmouseenter="this.style.background=\'#1a1a1a\'" onmouseleave="this.style.background=\'transparent\'">';
@@ -723,10 +743,10 @@
           rows += '<td style="padding:14px 16px;text-align:right;color:lime;font-weight:bold">' + fmtUsd(liqUsd) + '</td>';
           rows += '<td style="padding:14px 16px;text-align:right;color:#ccc" class="lp-hide-mobile">' + fmtUsd(volH24) + '</td>';
           rows += '<td style="padding:14px 16px;text-align:right;white-space:nowrap">';
-          rows += '<span style="display:inline-block;padding:4px 10px;border-radius:12px;font-size:0.6rem;font-weight:bold;color:#000;background:' + dexColor + ';margin-right:6px">' + dexName + '</span>';
-          if (lpLink) {
-            rows += '<a href="' + lpLink + ca + '/" target="_blank" rel="noopener" style="display:inline-block;padding:4px 10px;border-radius:12px;font-size:0.6rem;color:lime;border:1px solid lime;text-decoration:none;transition:all 0.2s" onmouseenter="this.style.background=\'rgba(0,255,0,0.15)\'" onmouseleave="this.style.background=\'transparent\'">+ LP</a>';
-          }
+          const badge = '<span style="display:inline-block;padding:4px 10px;border-radius:12px;font-size:0.6rem;font-weight:bold;color:#000;background:' + dexColor + ';margin-right:6px">' + dexName + '</span>';
+          rows += poolUrl
+            ? '<a href="' + poolUrl + '" target="_blank" rel="noopener" title="open this pool on ' + dexName + '" style="text-decoration:none">' + badge + '</a>'
+            : badge;
           rows += ' <a href="' + dsLink + '" target="_blank" rel="noopener" style="display:inline-block;padding:4px 8px;border-radius:12px;font-size:0.55rem;color:#888;border:1px solid #333;text-decoration:none;transition:all 0.2s" onmouseenter="this.style.borderColor=\'#555\'" onmouseleave="this.style.borderColor=\'#333\'">chart</a>';
           rows += '</td></tr>';
         }
