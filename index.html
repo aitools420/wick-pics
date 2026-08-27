@@ -675,12 +675,24 @@
       const ver = (pair.labels || [])[0];
       return ver ? base + ' ' + ver.toUpperCase() : base;
     }
+    // 9mm publishes a genuinely good pool page, so those rows go there. Everything else
+    // used to dump you on a block explorer; those now open OUR page, which reads the same
+    // pool live and shows what is in it, what it is worth and what is moving through it.
+    // Slug is <dex>-<partner>-<version>, resolved on that page by listing WICK's pools —
+    // no mapping to maintain, so a pool created tomorrow is linkable tomorrow.
+    function poolSlug(pair) {
+      const ver = ((pair.labels || [])[0] || '').toLowerCase();
+      const wickIsBase = pair.baseToken?.address?.toLowerCase() === ca;
+      const partner = wickIsBase ? pair.quoteToken : pair.baseToken;
+      const sym = (partner?.symbol || '?').toLowerCase().replace(/[^a-z0-9]/g, '');
+      return [pair.dexId || 'dex', sym, ver].filter(Boolean).join('-');
+    }
     function poolLink(pair) {
       const addr = pair.pairAddress;
       if (!addr) return '';
       return pair.dexId === '9mm'
         ? 'https://dex.9mm.pro/info/pairs/' + addr
-        : 'https://otter.pulsechain.com/address/' + addr;
+        : '/pool/?' + poolSlug(pair);
     }
 
     function fmtUsd(n) {

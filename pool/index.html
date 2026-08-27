@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pool — WICK.PICS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A live look inside a $WICK liquidity pool on PulseChain — what's in it, what it's worth, and what's moving through it. Read straight off the market, stored nowhere.">
+  <link rel="canonical" href="https://wick.pics/pool/">
+  <meta name="theme-color" content="#00ff00">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="wick.pics">
+  <meta property="og:title" content="Inside a $WICK pool — wick.pics">
+  <meta property="og:description" content="What's in the pool, what it's worth, and what's moving through it. Live off the market.">
+  <meta property="og:image" content="https://wick.pics/GreenWick.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Bungee+Shade&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{overflow-x:clip}
+    body{background:linear-gradient(45deg,#000,#0a0a0a,#111);color:#e8e8e8;font-family:sans-serif;min-height:100vh;padding:0 0 60px}
+    a{color:#00ff00}
+    .wrap{max-width:860px;margin:0 auto;padding:0 16px}
+    header{padding:22px 0 10px}
+    .back{font-family:ui-monospace,'Courier New',monospace;font-size:0.7rem;color:#3fb950;text-decoration:none;letter-spacing:1px}
+    .back:hover{color:#00ff00}
+    h1{font-family:'Bungee Shade',cursive;font-size:clamp(1.6rem,6vw,2.6rem);color:#00ff00;line-height:1.15;margin:14px 0 4px;text-shadow:0 0 18px rgba(0,255,0,.35)}
+    .sub{font-family:ui-monospace,'Courier New',monospace;font-size:0.72rem;color:#3fb950;letter-spacing:1px}
+    .card{background:#0d0d0d;border:2px solid #1f3f1f;border-radius:12px;margin-top:18px;overflow:hidden}
+    .card h2{font-family:'Press Start 2P',cursive;font-size:0.6rem;letter-spacing:1px;color:#00ff00;padding:13px 16px;background:#111;border-bottom:2px solid #1f3f1f;text-shadow:0 0 8px rgba(0,255,0,.5)}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+    .cell{padding:14px 16px;border-right:1px solid #1a1a1a;border-bottom:1px solid #1a1a1a}
+    .cell b{display:block;font-family:ui-monospace,'Courier New',monospace;font-size:0.58rem;color:#666;letter-spacing:1px;text-transform:uppercase}
+    .cell strong{display:block;margin-top:6px;font-family:ui-monospace,'Courier New',monospace;font-size:1.05rem;color:#fff;font-weight:700}
+    .cell small{display:block;margin-top:3px;font-family:ui-monospace,'Courier New',monospace;font-size:0.62rem;color:#555}
+    .up{color:#00ff00 !important}
+    .down{color:#ff5c5c !important}
+    table{width:100%;border-collapse:collapse;font-family:ui-monospace,'Courier New',monospace;font-size:0.74rem}
+    th,td{padding:9px 16px;text-align:right;border-bottom:1px solid #1a1a1a;white-space:nowrap}
+    th:first-child,td:first-child{text-align:left}
+    th{color:#666;font-weight:400;font-size:0.6rem;letter-spacing:1px;text-transform:uppercase}
+    .addr{font-family:ui-monospace,'Courier New',monospace;font-size:0.72rem;color:#00ff00;word-break:break-all;padding:14px 16px;display:block}
+    .links{padding:14px 16px;display:flex;flex-wrap:wrap;gap:8px}
+    .chip{display:inline-flex;align-items:center;font-family:ui-monospace,'Courier New',monospace;font-size:0.66rem;font-weight:700;color:#00ff00;background:#0a0a0a;border:1px solid lime;border-radius:8px;padding:7px 13px;text-decoration:none}
+    .chip:hover{background:rgba(0,255,0,.12)}
+    .note{font-family:ui-monospace,'Courier New',monospace;font-size:0.64rem;color:#555;padding:14px 16px;line-height:1.7}
+    .msg{font-family:ui-monospace,'Courier New',monospace;font-size:0.78rem;color:#3fb950;padding:26px 16px;text-align:center}
+    footer{margin-top:34px;padding-top:18px;border-top:1px solid #1f3f1f;font-family:ui-monospace,'Courier New',monospace;font-size:0.64rem;color:#555;text-align:center}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header><a class="back" href="/">&larr; WICK.PICS</a></header>
+  <h1 id="title">Reading the pool…</h1>
+  <div class="sub" id="subtitle">off the market, live</div>
+  <div id="content"><div class="msg">fetching…</div></div>
+  <footer>Everything on this page is read live when you open it. We store none of it, so there is nothing here to go stale.</footer>
+</div>
+
+<script>
+// A pool page with NO BACKEND, on purpose. Every number below comes from one request
+// made by YOUR browser when you open it — nothing is recorded, cached or kept, so there
+// is no pipeline to break and nothing that can quietly go out of date. The trade is that
+// there is no long-run chart: a real one needs somebody to store history, and storing
+// history is what turns a page into infrastructure. The 5m/1h/6h/24h buckets below are
+// the honest version of "some history" for free.
+//
+// The slug is <dex>-<partner>-<version> — e.g. pulsex-wpls-v2 — and it is resolved by
+// listing WICK's pools and matching, NOT from a table we maintain. A pool created
+// tomorrow is linkable tomorrow, with nothing to update here.
+const WICK = '0x8cdaf3d630da9e1450832924d5701cc0500e9cfc';
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const usd = n => n == null ? '—' : (n >= 1e6 ? '$' + (n/1e6).toFixed(2) + 'M' : n >= 1e3 ? '$' + (n/1e3).toFixed(2) + 'K' : '$' + Number(n).toFixed(2));
+const qty = n => {
+  n = Number(n || 0);
+  if (n >= 1e9) return (n/1e9).toFixed(2) + 'B';
+  if (n >= 1e6) return (n/1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
+  return n.toFixed(n < 1 ? 4 : 2);
+};
+const pct = n => n == null ? '—' : (n >= 0 ? '+' : '') + Number(n).toFixed(2) + '%';
+const ago = ms => {
+  if (!ms) return '—';
+  const d = (Date.now() - ms) / 86400000;
+  return d >= 365 ? (d/365).toFixed(1) + ' years' : d >= 1 ? Math.round(d) + ' days' : Math.round(d*24) + ' hours';
+};
+function partnerOf(p) {
+  const b = p.baseToken || {}, q = p.quoteToken || {};
+  return (b.address || '').toLowerCase() === WICK ? q : b;
+}
+function slugOf(p) {
+  const ver = ((p.labels || [])[0] || '').toLowerCase();
+  const sym = (partnerOf(p).symbol || '?').toLowerCase().replace(/[^a-z0-9]/g, '');
+  return [p.dexId || 'dex', sym, ver].filter(Boolean).join('-');
+}
+// the slug can arrive as ?pulsex-wpls-v2, ?p=pulsex-wpls-v2 or #pulsex-wpls-v2 —
+// a link that only works one of those three ways is a link people will get wrong
+function wantedSlug() {
+  const q = location.search.replace(/^\?/, '');
+  if (q) return decodeURIComponent(q.startsWith('p=') ? q.slice(2) : q.split('&')[0]).toLowerCase();
+  return decodeURIComponent(location.hash.replace(/^#/, '')).toLowerCase();
+}
+
+(async function () {
+  const want = wantedSlug();
+  if (!want) { $('#title').textContent = 'Which pool?'; $('#content').innerHTML =
+    '<div class="msg">Open this page from a pool badge on the front page — the link carries which pool you meant.</div>'; return; }
+  let pairs;
+  try {
+    const r = await fetch('https://api.dexscreener.com/token-pairs/v1/pulsechain/' + WICK);
+    pairs = await r.json();
+    if (!Array.isArray(pairs)) pairs = pairs.pairs || [];
+  } catch (e) {
+    $('#title').textContent = 'Can’t reach the market';
+    $('#content').innerHTML = '<div class="msg">The price feed didn’t answer just now. Nothing is broken here — reload in a moment.</div>';
+    return;
+  }
+  const p = pairs.find(x => slugOf(x) === want);
+  if (!p) {
+    $('#title').textContent = 'No such pool';
+    $('#content').innerHTML = '<div class="msg">Nothing matching <b>' + esc(want) + '</b> is live right now. Pools that drain away stop being listed.</div>'
+      + '<div class="note">Live WICK pools: ' + pairs.filter(x => (x.liquidity||{}).usd >= 1).map(x => '<a href="?' + esc(slugOf(x)) + '">' + esc(slugOf(x)) + '</a>').join(' · ') + '</div>';
+    return;
+  }
+
+  const other = partnerOf(p);
+  const wickIsBase = (p.baseToken || {}).address?.toLowerCase() === WICK;
+  const liq = p.liquidity || {}, vol = p.volume || {}, chg = p.priceChange || {}, tx = p.txns || {};
+  const wickAmt = wickIsBase ? liq.base : liq.quote;
+  const otherAmt = wickIsBase ? liq.quote : liq.base;
+  const dexName = (p.dexId || 'dex') + ((p.labels || [])[0] ? ' ' + p.labels[0].toUpperCase() : '');
+
+  document.title = 'WICK / ' + (other.symbol || '?') + ' on ' + dexName + ' — WICK.PICS';
+  $('#title').innerHTML = 'WICK <span style="color:#555">/</span> ' + esc(other.symbol || '?');
+  $('#subtitle').textContent = dexName + ' · pool opened ' + ago(p.pairCreatedAt) + ' ago';
+
+  const row = (label, value, sub, cls) =>
+    '<div class="cell"><b>' + label + '</b><strong class="' + (cls || '') + '">' + value + '</strong>' + (sub ? '<small>' + sub + '</small>' : '') + '</div>';
+
+  const win = (k, label) => '<tr><td>' + label + '</td><td>' + usd(vol[k]) + '</td><td class="' + ((chg[k] || 0) >= 0 ? 'up' : 'down') + '">' + (chg[k] == null ? '—' : pct(chg[k])) + '</td><td>' + ((tx[k] || {}).buys ?? '—') + '</td><td>' + ((tx[k] || {}).sells ?? '—') + '</td></tr>';
+
+  $('#content').innerHTML =
+    '<div class="card"><h2>WHAT IS IN THE POOL</h2><div class="grid">'
+      + row('Total liquidity', usd(liq.usd))
+      + row('WICK side', qty(wickAmt) + ' <span style="color:#666;font-size:.7em">WICK</span>')
+      + row(esc(other.symbol || '?') + ' side', qty(otherAmt) + ' <span style="color:#666;font-size:.7em">' + esc(other.symbol || '') + '</span>')
+      + row('WICK price here', p.priceUsd ? '$' + Number(p.priceUsd).toPrecision(4) : '—', p.priceNative ? Number(p.priceNative).toPrecision(4) + ' ' + esc(other.symbol || '') : '')
+    + '</div></div>'
+
+    + '<div class="card"><h2>WHAT IS MOVING THROUGH IT</h2>'
+      + '<table><thead><tr><th>window</th><th>volume</th><th>price</th><th>buys</th><th>sells</th></tr></thead><tbody>'
+      + win('h24', 'last 24 hours') + win('h6', 'last 6 hours') + win('h1', 'last hour') + win('m5', 'last 5 min')
+      + '</tbody></table>'
+      + '<div class="note">Four windows instead of a chart, and that is a deliberate limit: a real chart needs someone to store history, and we would rather this page keep working forever than know what happened last Tuesday.</div>'
+    + '</div>'
+
+    + '<div class="card"><h2>THE CONTRACT</h2>'
+      + '<code class="addr">' + esc(p.pairAddress) + '</code>'
+      + '<div class="note">On a V2 pool every provider shares this one contract, so this address <em>is</em> the LP. On a V3 pool it is the pool itself, with each position held separately as an NFT.</div>'
+      + '<div class="links">'
+        + '<a class="chip" target="_blank" rel="noopener" href="https://otter.pulsechain.com/address/' + esc(p.pairAddress) + '">CONTRACT</a>'
+        + '<a class="chip" target="_blank" rel="noopener" href="' + esc(p.url || ('https://dexscreener.com/pulsechain/' + p.pairAddress)) + '">CHART</a>'
+        + (p.dexId === '9mm' ? '<a class="chip" target="_blank" rel="noopener" href="https://dex.9mm.pro/info/pairs/' + esc(p.pairAddress) + '">ON 9MM</a>' : '')
+        + '<a class="chip" href="/">ALL POOLS</a>'
+      + '</div>'
+    + '</div>';
+})();
+</script>
+</body>
+</html>
