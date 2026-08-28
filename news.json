@@ -1,291 +1,301 @@
 [
-  {
-    "date": "2026-08-27",
-    "line": "Instant-DYOR bot upgraded in WICK gated TG",
-    "links": [
-      {
-        "label": "Join TG",
-        "url": "https://tg.wick.pics"
-      }
-    ]
-  },
-  {
-    "date": "2026-08-26",
-    "line": "WICK Guns, Mods & KJP Gear consolidated into one marketplace",
-    "links": [
-      {
-        "label": "The High Table",
-        "url": "https://mint.wick.pics"
-      }
-    ]
-  },
-  {
-    "date": "2026-08-25",
-    "line": "The WICK Agentic trinity: Comms, Cash & Compute",
-    "links": [
-      {
-        "label": "Pangle",
-        "url": "https://pangle.online"
-      }
-    ]
-  },
-  {
-    "date": "2026-08-24",
-    "line": "Dust sweeper: a big usability pass (UI/UX).",
-    "links": [
-      {
-        "label": "Sweep dust",
-        "url": "https://dust.wick.pics"
-      }
-    ]
-  },
-  {
-    "date": "2026-08-19",
-    "line": "Tower Defence game, use your NFTs!",
-    "links": [
-      {
-        "label": "Play",
-        "url": "https://games.wick.pics/siege/"
-      },
-      {
-        "label": "Arcade",
-        "url": "https://games.wick.pics"
-      }
-    ]
-  },
-  {
-    "date": "2026-08-08",
-    "line": "A critical security site for all of crypto.",
-    "links": [
-      {
-        "label": "Read it",
-        "url": "https://security.wick.pics"
-      }
-    ]
-  },
-  {
-    "date": "2026-08-07",
-    "line": "First AI-built customer site is live.",
-    "links": [
-      {
-        "label": "See it",
-        "url": "https://daisy.wick.pics"
-      },
-      {
-        "label": "The company",
-        "url": "https://zhc.wick.pics"
-      }
-    ]
-  },
-  {
-    "date": "2026-08-06",
-    "line": "Grid bots are coming to NOXABOT.",
-    "links": [
-      {
-        "label": "Grid",
-        "url": "https://noxa.bot/grid"
-      },
-      {
-        "label": "NOXABOT",
-        "url": "https://noxa.bot"
-      }
-    ]
-  },
-  {
-    "date": "2026-08-05",
-    "line": "Non-custodial launch sniper.",
-    "links": [
-      {
-        "label": "Try it",
-        "url": "https://noxa.bot"
-      }
-    ]
-  },
-  {
-    "date": "2026-08-04",
-    "line": "A tool to batch revoke token approvals.",
-    "links": [
-      {
-        "label": "Revoke",
-        "url": "https://revoke.wick.pics"
-      }
-    ]
-  },
-  {
-    "date": "2026-07-31",
-    "line": "Awards for the web's MOST LEGIT sites.",
-    "links": [
-      {
-        "label": "See it",
-        "url": "https://legit.wick.pics"
-      }
-    ]
-  },
-  {
-    "date": "2026-07-30",
-    "line": "KJP: The Black File — new game, live.",
-    "links": [
-      {
-        "label": "Play",
-        "url": "https://kjp.wick.pics"
-      }
-    ]
-  },
-  {
-    "date": "2026-07-30",
-    "line": "PEPE WICK: Arcade Alley — live.",
-    "links": [
-      {
-        "label": "Play",
-        "url": "https://games.wick.pics"
-      }
-    ]
-  },
-  {
-    "date": "2026-07-29",
-    "line": "Shareable flex cards for your PulseChain wins.",
-    "links": [
-      {
-        "label": "Flex",
-        "url": "https://flex.wick.pics"
-      }
-    ]
-  },
-  {
-    "date": "2026-07-26",
-    "line": "WICK Arsenal: mintable Gun NFTs.",
-    "links": [
-      {
-        "label": "Mint",
-        "url": "https://arsenal.wick.pics"
-      }
-    ]
-  },
-  {
-    "date": "2026-07-22",
-    "line": "NOXABOT fees are buying $WICK.",
-    "links": [
-      {
-        "label": "NOXABOT",
-        "url": "https://noxa.bot"
-      }
-    ]
-  },
-  {
-    "date": "2026-07-06",
-    "line": "The Zero Human Company opened for business.",
-    "links": [
-      {
-        "label": "The company",
-        "url": "https://zhc.wick.pics"
-      }
-    ]
-  },
-  {
-    "date": "2026-07-06",
-    "line": "A benchmark for AI's ability to make money.",
-    "links": [
-      {
-        "label": "See it",
-        "url": "https://earnbench.wick.pics"
-      }
-    ]
-  },
-  {
-    "date": "2026-07-02",
-    "line": "Check any token for rugs & honeypots in seconds.",
-    "links": [
-      {
-        "label": "Check a token",
-        "url": "https://onchain.wick.pics"
-      }
-    ]
-  },
-  {
-    "date": "2026-06-22",
-    "line": "Reaching the next AI capability tier by coordination.",
-    "links": [
-      {
-        "label": "Read the paper",
-        "url": "https://aus.wick.pics/research/"
-      }
-    ]
-  },
-  {
-    "date": "2026-06-11",
-    "line": "Read the ETH gas cycle before you transact.",
-    "links": [
-      {
-        "label": "See it",
-        "url": "https://tide.wick.pics"
-      }
-    ]
-  },
-  {
-    "date": "2026-06-08",
-    "line": "An open AI-agent hive-mind on PulseChain.",
-    "links": [
-      {
-        "label": "See it",
-        "url": "https://pangle.wick.pics"
-      }
-    ]
-  },
-  {
-    "date": "2026-05-18",
-    "line": "Golden Coins community site is live.",
-    "links": [
-      {
-        "label": "See it",
-        "url": "https://gold.wick.pics"
-      }
-    ]
-  },
-  {
-    "date": "2026-03-31",
-    "line": "Tap a crypto cliché to shill it.",
-    "links": [
-      {
-        "label": "Shill",
-        "url": "https://lfg.wick.pics"
-      }
-    ]
-  },
-  {
-    "date": "2026-03-25",
-    "line": "Why $WICK is built for the agent era.",
-    "links": [
-      {
-        "label": "Read it",
-        "url": "https://agent.wick.pics"
-      }
-    ]
-  },
-  {
-    "date": "2026-03-21",
-    "line": "Wrap your PFP in a $WICK ring.",
-    "links": [
-      {
-        "label": "Make one",
-        "url": "https://pfp.wick.pics"
-      }
-    ]
-  },
-  {
-    "date": "2025-03-18",
-    "line": "A curated directory of AI & agent tools.",
-    "links": [
-      {
-        "label": "See it",
-        "url": "https://aitools.wick.pics"
-      }
-    ]
-  },
-  {
-    "_comment": "PLACEHOLDER — future rh.wick.pics entry. Owner to supply date, line, and links. Items with \"placeholder\": true are NOT rendered on the site.",
-    "placeholder": true,
-    "date": "",
-    "line": "",
-    "links": []
-  }
+{
+"date": "2026-08-28",
+"line": "qWICKpay: x402 facilitator for every EVM chain",
+"links": [
+{
+"label": "pay.wick.pics",
+"url": "https://pay.wick.pics"
+}
+]
+},
+{
+"date": "2026-08-27",
+"line": "Instant-DYOR bot upgraded in WICK gated TG",
+"links": [
+{
+"label": "Join TG",
+"url": "https://tg.wick.pics"
+}
+]
+},
+{
+"date": "2026-08-26",
+"line": "WICK Guns, Mods & KJP Gear consolidated into one marketplace",
+"links": [
+{
+"label": "The High Table",
+"url": "https://mint.wick.pics"
+}
+]
+},
+{
+"date": "2026-08-25",
+"line": "The WICK Agentic trinity: Comms, Cash & Compute",
+"links": [
+{
+"label": "Pangle",
+"url": "https://pangle.online"
+}
+]
+},
+{
+"date": "2026-08-24",
+"line": "Dust sweeper: a big usability pass (UI/UX).",
+"links": [
+{
+"label": "Sweep dust",
+"url": "https://dust.wick.pics"
+}
+]
+},
+{
+"date": "2026-08-19",
+"line": "Tower Defence game, use your NFTs!",
+"links": [
+{
+"label": "Play",
+"url": "https://games.wick.pics/siege/"
+},
+{
+"label": "Arcade",
+"url": "https://games.wick.pics"
+}
+]
+},
+{
+"date": "2026-08-08",
+"line": "A critical security site for all of crypto.",
+"links": [
+{
+"label": "Read it",
+"url": "https://security.wick.pics"
+}
+]
+},
+{
+"date": "2026-08-07",
+"line": "First AI-built customer site is live.",
+"links": [
+{
+"label": "See it",
+"url": "https://daisy.wick.pics"
+},
+{
+"label": "The company",
+"url": "https://zhc.wick.pics"
+}
+]
+},
+{
+"date": "2026-08-06",
+"line": "Grid bots are coming to NOXABOT.",
+"links": [
+{
+"label": "Grid",
+"url": "https://noxa.bot/grid"
+},
+{
+"label": "NOXABOT",
+"url": "https://noxa.bot"
+}
+]
+},
+{
+"date": "2026-08-05",
+"line": "Non-custodial launch sniper.",
+"links": [
+{
+"label": "Try it",
+"url": "https://noxa.bot"
+}
+]
+},
+{
+"date": "2026-08-04",
+"line": "A tool to batch revoke token approvals.",
+"links": [
+{
+"label": "Revoke",
+"url": "https://revoke.wick.pics"
+}
+]
+},
+{
+"date": "2026-07-31",
+"line": "Awards for the web's MOST LEGIT sites.",
+"links": [
+{
+"label": "See it",
+"url": "https://legit.wick.pics"
+}
+]
+},
+{
+"date": "2026-07-30",
+"line": "KJP: The Black File — new game, live.",
+"links": [
+{
+"label": "Play",
+"url": "https://kjp.wick.pics"
+}
+]
+},
+{
+"date": "2026-07-30",
+"line": "PEPE WICK: Arcade Alley — live.",
+"links": [
+{
+"label": "Play",
+"url": "https://games.wick.pics"
+}
+]
+},
+{
+"date": "2026-07-29",
+"line": "Shareable flex cards for your PulseChain wins.",
+"links": [
+{
+"label": "Flex",
+"url": "https://flex.wick.pics"
+}
+]
+},
+{
+"date": "2026-07-26",
+"line": "WICK Arsenal: mintable Gun NFTs.",
+"links": [
+{
+"label": "Mint",
+"url": "https://arsenal.wick.pics"
+}
+]
+},
+{
+"date": "2026-07-22",
+"line": "NOXABOT fees are buying $WICK.",
+"links": [
+{
+"label": "NOXABOT",
+"url": "https://noxa.bot"
+}
+]
+},
+{
+"date": "2026-07-06",
+"line": "The Zero Human Company opened for business.",
+"links": [
+{
+"label": "The company",
+"url": "https://zhc.wick.pics"
+}
+]
+},
+{
+"date": "2026-07-06",
+"line": "A benchmark for AI's ability to make money.",
+"links": [
+{
+"label": "See it",
+"url": "https://earnbench.wick.pics"
+}
+]
+},
+{
+"date": "2026-07-02",
+"line": "Check any token for rugs & honeypots in seconds.",
+"links": [
+{
+"label": "Check a token",
+"url": "https://onchain.wick.pics"
+}
+]
+},
+{
+"date": "2026-06-22",
+"line": "Reaching the next AI capability tier by coordination.",
+"links": [
+{
+"label": "Read the paper",
+"url": "https://aus.wick.pics/research/"
+}
+]
+},
+{
+"date": "2026-06-11",
+"line": "Read the ETH gas cycle before you transact.",
+"links": [
+{
+"label": "See it",
+"url": "https://tide.wick.pics"
+}
+]
+},
+{
+"date": "2026-06-08",
+"line": "An open AI-agent hive-mind on PulseChain.",
+"links": [
+{
+"label": "See it",
+"url": "https://pangle.wick.pics"
+}
+]
+},
+{
+"date": "2026-05-18",
+"line": "Golden Coins community site is live.",
+"links": [
+{
+"label": "See it",
+"url": "https://gold.wick.pics"
+}
+]
+},
+{
+"date": "2026-03-31",
+"line": "Tap a crypto cliché to shill it.",
+"links": [
+{
+"label": "Shill",
+"url": "https://lfg.wick.pics"
+}
+]
+},
+{
+"date": "2026-03-25",
+"line": "Why $WICK is built for the agent era.",
+"links": [
+{
+"label": "Read it",
+"url": "https://agent.wick.pics"
+}
+]
+},
+{
+"date": "2026-03-21",
+"line": "Wrap your PFP in a $WICK ring.",
+"links": [
+{
+"label": "Make one",
+"url": "https://pfp.wick.pics"
+}
+]
+},
+{
+"date": "2025-03-18",
+"line": "A curated directory of AI & agent tools.",
+"links": [
+{
+"label": "See it",
+"url": "https://aitools.wick.pics"
+}
+]
+},
+{
+"_comment": "PLACEHOLDER — future rh.wick.pics entry. Owner to supply date, line, and links. Items with \"placeholder\": true are NOT rendered on the site.",
+"placeholder": true,
+"date": "",
+"line": "",
+"links": []
+}
 ]
