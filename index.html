@@ -643,6 +643,9 @@
         const price = best.priceUsd;
         const change = best.priceChange?.h24;
         const mc = best.marketCap;
+        // the link follows the SAME pool the numbers come from (Chef 2026-08-29: the button showed one pool's price,
+        // the click landed on another — the hard-coded PulseX pair was #5 by liquidity that day)
+        ticker.href = best.url || ('https://dexscreener.com/pulsechain/' + best.pairAddress);
         const ch = change?.toFixed(2) || 0;
         const chColor = parseFloat(ch) < 0 ? '#f85149' : 'lime';
         ticker.innerHTML = `$${parseFloat(price).toPrecision(2)} | <span style="white-space:nowrap;color:${chColor}">24h: ${ch}%</span> | <span style="white-space:nowrap">MC:&nbsp;$${mc?.toLocaleString() || 'N/A'}</span>`;
