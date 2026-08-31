@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>$WICK — Never Kill A Frog's Dog</title>
 <meta name="description" content="$WICK on PulseChain. A frog with a gun and a grudge — and an AI company that ships. Light the wick.">
 <meta property="og:title" content="$WICK — Never Kill A Frog's Dog">
@@ -16,471 +16,1277 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════════════════════════════
-   $WICK v2 — supersaiyan.co's STRUCTURE, in WICK's own identity.
-   Their art, copy and code are theirs. What is cloned here is the section flow
-   and the interaction pattern Chef asked for (TG 4886):
-     · ONE fixed full-viewport pane (#wick-canvas) that every section scrolls over
-     · a transparent hero that lets that pane show through
-     · fixed chrome: disclaimer, nav, CA bottom-left, anthem bottom-right, scroll hint
-     · a 100vh mid-page quote pane on a FIXED background (the parallax break)
-     · "rotating features" — a light that orbits each card's edge, floating orbs,
-       drifting grids, a scan line, an EQ
-     · ten sections, not six:
-       hero · origin · inflection · powerlevel · how-to-buy · builds · arcade ·
-       anthem · ascend  (+ the tap-to-light gate)
+   $WICK v2 — supersaiyan.co's SECTION FLOW and INTERACTION MECHANICS,
+   written from scratch in WICK's own identity. Their art, copy and code are
+   theirs; every line below is ours.
+
+   Ten sections, their order:
+     hero · origin · inflection · power · howtobuy · crew · builds · arcade ·
+     anthem · ascend      (their hero/about/inflection/tokenomics/howtobuy/
+                           team/creator/game/music/footer)
+
+   The mechanics that are actually cloned — and all of them really run:
+     · ONE #wick-canvas, position:fixed, 100vw/100vh, z-0, that the whole page
+       scrolls over; a transparent hero so it reads as the page background
+     · a 100vh parallax break on background-attachment:fixed (scroll <860px —
+       iOS cannot composite a fixed background)
+     · .is-live — ambient motion is gated to the section you are looking at,
+       added AND removed by an IntersectionObserver, exactly like their
+       ScrollTrigger toggle. Nothing animates off-screen.
+     · a light that genuinely travels a card's border (conic gradient spun by
+       an @property angle, masked to a 1px ring)
+     · orbs that float + breathe on staggered timing and burst on click
+     · a 3D perspective ring you can drag
+     · drifting grids, scan lines, breathing glows, an EQ
+     · a BUY modal — every buy control opens it, the reader picks the venue
    ═══════════════════════════════════════════════════════════════════════════ */
 :root{
   --bg:#050705; --ink:#e9ffe9; --dim:#7fa17f; --line:#16301a;
   --wick:#00ff41;          /* WICK green, the one shouting colour */
   --gold:#ffb02e;          /* the second accent — muzzle flash */
   --disp:'Bebas Neue',Impact,sans-serif; --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  --ease:cubic-bezier(.19,1,.22,1);
   --navh:26px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;background:var(--bg)}
 body{background:var(--bg);color:var(--ink);font:400 16px/1.6 var(--mono);-webkit-font-smoothing:antialiased;overflow-x:hidden}
 a{color:inherit;text-decoration:none}
-.wrap{max-width:1180px;margin:0 auto;padding:0 22px;width:100%}
-.lbl{font:500 11px/1.4 var(--mono);letter-spacing:.28em;text-transform:uppercase;color:var(--wick)}
-h2{font:400 clamp(44px,8vw,104px)/.88 var(--disp);letter-spacing:.01em;margin:.18em 0 .5em}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+img{max-width:100%}
+.lbl{display:block;font:500 11px/1.4 var(--mono);letter-spacing:.28em;text-transform:uppercase;color:var(--wick)}
+h2{font:400 clamp(42px,7.5vw,96px)/.88 var(--disp);letter-spacing:.02em;margin:.16em 0 .42em}
 .lede{color:var(--dim);max-width:62ch;font-size:15px}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-/* ── THE FIXED PANE ──────────────────────────────────────────────────────────
-   This is the thing that was missing. One canvas, position:fixed, behind every
-   section for the whole scroll. Sections ride over it at z-index 2; the hero is
-   transparent so it reads as the page's own background.                     */
+/* entrance — one class, staggered by --i, released when the section goes live */
+.rv{opacity:0;transform:translateY(34px);transition:opacity .8s var(--ease),transform .8s var(--ease);transition-delay:calc(var(--i,0)*.09s)}
+.is-live .rv,.rv.in{opacity:1;transform:none}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .rv{opacity:1!important;transform:none!important}
+}
+
+/* ── THE FIXED PANE ────────────────────────────────────────────────────────
+   One canvas, position:fixed, behind every section for the whole scroll.
+   Sections ride over it at z-index 2; the hero is transparent.            */
 #wick-canvas{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none;background-color:var(--bg)}
 #wick-veil{position:fixed;inset:0;z-index:1;pointer-events:none;
   background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(0,255,65,.10) 0%,transparent 62%),
              radial-gradient(ellipse 60% 40% at 80% 90%,rgba(255,176,46,.06) 0%,transparent 70%)}
 
-/* ── GATE ─────────────────────────────────────────────────────────────────── */
+/* ── ENTRY GATE / PRELOADER ───────────────────────────────────────────────── */
 #gate{position:fixed;inset:0;z-index:9999;background:var(--bg);display:grid;place-items:center;cursor:pointer;transition:opacity .7s ease}
 #gate.gone{opacity:0;pointer-events:none}
 #gate .tick{position:absolute;top:18px;left:22px;font:500 11px/1 var(--mono);letter-spacing:.3em;color:var(--wick);opacity:.75}
+#gate .boot{position:absolute;top:44px;left:22px;font:500 10px/1.9 var(--mono);letter-spacing:.16em;color:var(--dim);opacity:.7;text-align:left}
 #gatemark{width:min(58vw,420px);filter:drop-shadow(0 0 42px rgba(0,255,65,.42));position:relative;z-index:2}
-#gate .tap{position:absolute;bottom:14vh;font:500 12px/1 var(--mono);letter-spacing:.5em;color:var(--wick);animation:pulse 1.9s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
+#gate .tap{position:absolute;bottom:14vh;font:500 12px/1 var(--mono);letter-spacing:.5em;color:var(--wick);animation:tap-pulse 1.9s ease-in-out infinite}
+@keyframes tap-pulse{0%,100%{opacity:.35}50%{opacity:1}}
 #bolt{position:absolute;width:min(70vw,520px);height:min(70vw,520px);border-radius:50%;
   background:radial-gradient(circle,rgba(0,255,65,.20),transparent 62%);animation:breathe 3.4s ease-in-out infinite}
 @keyframes breathe{0%,100%{transform:scale(.92)}50%{transform:scale(1.06)}}
 
-/* ── FIXED CHROME ─────────────────────────────────────────────────────────── */
+/* ── FIXED FURNITURE ──────────────────────────────────────────────────────── */
 .disc{position:fixed;top:0;left:0;right:0;z-index:170;display:flex;align-items:center;justify-content:center;
-  min-height:26px;padding:5px 16px;background:rgba(5,7,5,.92);border-bottom:1px solid var(--line);
-  font:500 10px/1.4 var(--mono);letter-spacing:.05em;color:var(--dim);text-align:center}
-header{position:fixed;top:var(--navh);left:0;right:0;z-index:160;backdrop-filter:blur(9px);background:rgba(5,7,5,.78);border-bottom:1px solid var(--line)}
-.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 22px;max-width:1180px;margin:0 auto}
-.brand{display:flex;align-items:center;gap:10px;font:400 26px/1 var(--disp);letter-spacing:.06em;color:var(--wick)}
-.brand img{width:30px;height:30px;border-radius:50%;border:1px solid var(--wick)}
-nav ul{display:flex;align-items:center;gap:20px;list-style:none;font:500 11px/1 var(--mono);letter-spacing:.2em}
-nav a:hover{color:var(--wick)}
-nav .cta{border:1px solid var(--wick);color:var(--wick);padding:8px 12px;border-radius:3px}
-nav .cta:hover{background:rgba(0,255,65,.1)}
+  min-height:26px;padding:5px 16px;background:rgba(5,7,5,.94);border-bottom:1px solid var(--line);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);pointer-events:none;
+  font:500 10px/1.4 var(--mono);letter-spacing:.06em;color:var(--dim);text-align:center}
+.disc__short{display:none}
 
-/* the two fixed corner rails + scroll hint — supersaiyan's persistent furniture */
-.rail{position:fixed;bottom:26px;z-index:140;display:flex;align-items:center;gap:12px;pointer-events:all;
-  font:500 10px/1 var(--mono);letter-spacing:.16em;opacity:0;transform:translateY(16px);transition:opacity .8s ease,transform .8s ease}
-.rail.in{opacity:1;transform:none}
-.rail--ca{left:22px}
-.rail--anthem{right:22px}
-.rail button,.rail .chip{background:rgba(5,7,5,.72);border:1px solid var(--line);color:var(--dim);
-  padding:9px 12px;border-radius:999px;cursor:pointer;font:500 10px/1 var(--mono);letter-spacing:.16em;transition:.2s}
-.rail button:hover,.rail .chip:hover{border-color:var(--wick);color:var(--wick)}
-.scroll-hint{position:fixed;bottom:24px;left:0;right:0;margin:0 auto;width:26px;height:44px;z-index:135;
-  border:1px solid var(--line);border-radius:999px;display:grid;place-items:start center;padding-top:7px;background:rgba(5,7,5,.5);
-  opacity:0;transition:opacity .8s ease .4s}
+header{position:fixed;top:var(--navh);left:0;right:0;z-index:160;display:flex;align-items:center;justify-content:space-between;
+  gap:16px;padding:16px 40px;pointer-events:all}
+header::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(to bottom,rgba(5,7,5,.88) 0%,rgba(5,7,5,.6) 55%,transparent 100%)}
+.brand{display:inline-flex;align-items:center;gap:10px;font:400 24px/1 var(--disp);letter-spacing:.06em;color:var(--wick);
+  text-shadow:0 0 22px rgba(0,255,65,.5);transition:text-shadow .3s;flex:0 1 auto;min-width:0;white-space:nowrap}
+.brand:hover{text-shadow:0 0 32px rgba(0,255,65,.9)}
+.brand img{width:32px;height:32px;border-radius:50%;border:1px solid var(--wick);flex:0 0 auto}
+.nav__links{display:flex;align-items:center;gap:28px;list-style:none}
+.nav__links a{position:relative;font:500 11px/1 var(--mono);letter-spacing:.15em;color:rgba(233,255,233,.72);transition:color .2s}
+.nav__links a::after{content:'';position:absolute;left:0;bottom:-3px;width:0;height:1px;background:var(--wick);transition:width .3s var(--ease)}
+.nav__links a:hover{color:var(--wick)}
+.nav__links a:hover::after{width:100%}
+.nav__cta{padding:8px 12px;border:1px solid rgba(0,255,65,.5);border-radius:999px;color:var(--wick);box-shadow:0 0 18px rgba(0,255,65,.08)}
+.nav__cta::after{display:none!important}
+.nav__cta:hover{background:rgba(0,255,65,.1);box-shadow:0 0 26px rgba(0,255,65,.2)}
+.nav__mini{display:none;align-items:center;gap:12px;flex:0 0 auto}
+.nav__mini a{display:inline-flex;align-items:center;color:rgba(233,255,233,.62);transition:color .2s,transform .2s}
+.nav__mini a:hover{color:var(--wick);transform:translateY(-2px)}
+.nav__mini svg{display:block;width:19px;height:19px}
+.nav__mini .nav__cta{font:500 9px/1 var(--mono);letter-spacing:.14em;padding:7px 10px}
+
+/* the fixed corner controls — CA bottom-left, anthem bottom-right, hint centre */
+.dial{position:fixed;bottom:32px;z-index:140;display:flex;align-items:flex-end;gap:14px;pointer-events:all;
+  opacity:0;transform:translateY(16px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+.dial.in{opacity:1;transform:none}
+.dial--ca{left:5vw}
+.dial--anthem{right:5vw;align-items:center}
+.knob{position:relative;flex:0 0 auto;width:64px;height:64px;display:grid;place-items:center;border-radius:50%;
+  border:1px solid rgba(0,255,65,.55);background:rgba(5,7,5,.7);color:var(--wick);
+  font:400 15px/1 var(--disp);letter-spacing:.06em;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  box-shadow:inset 0 0 0 1px rgba(0,255,65,.08),0 0 28px rgba(0,255,65,.18);
+  transition:transform .22s var(--ease),border-color .22s,box-shadow .22s}
+.knob:hover,.dial.is-open .knob{transform:scale(1.06);border-color:var(--wick);box-shadow:inset 0 0 0 1px rgba(0,255,65,.16),0 0 42px rgba(0,255,65,.32)}
+.knob:active{transform:scale(.96)}
+.knob::after{content:'';position:absolute;inset:-1px;border-radius:50%;border:1px solid rgba(0,255,65,.5);opacity:0;pointer-events:none}
+.dial--anthem .knob::after{animation:knob-ring 2.6s ease-out infinite}
+@keyframes knob-ring{0%{opacity:.55;transform:scale(1)}70%{opacity:0;transform:scale(1.5)}100%{opacity:0;transform:scale(1.5)}}
+.ca__panel{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px 12px;
+  width:min(540px,72vw);padding:13px 15px;background:rgba(5,7,5,.9);border:1px solid rgba(0,255,65,.26);border-radius:8px;
+  box-shadow:0 20px 70px rgba(0,0,0,.5),0 0 34px rgba(0,255,65,.09);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  opacity:0;transform:translateX(-14px) scaleX(.9);transform-origin:left center;pointer-events:none;
+  transition:opacity .3s var(--ease),transform .35s var(--ease)}
+.dial.is-open .ca__panel{opacity:1;transform:none;pointer-events:all}
+.ca__label{font:500 11px/1 var(--mono);letter-spacing:.15em;color:var(--wick)}
+.ca__addr{font:400 12px/1.4 var(--mono);color:rgba(233,255,233,.82);overflow-wrap:anywhere}
+.ca__copy{display:inline-flex;align-items:center;gap:6px;font:500 11px/1 var(--mono);letter-spacing:.1em;color:var(--wick);opacity:.75;transition:opacity .2s,transform .2s}
+.ca__copy:hover{opacity:1;transform:translateY(-1px)}
+.ca__buy{grid-column:1/-1;display:flex;align-items:center;justify-content:center;min-height:40px;border-radius:999px;
+  background:var(--wick);color:#031006;font:400 20px/1 var(--disp);letter-spacing:.1em;
+  box-shadow:0 0 24px rgba(0,255,65,.28);transition:transform .2s,box-shadow .2s}
+.ca__buy:hover{transform:translateY(-1px);box-shadow:0 0 38px rgba(0,255,65,.46)}
+.anthem__name{font:500 11px/1 var(--mono);letter-spacing:.18em;color:var(--gold);white-space:nowrap;
+  text-shadow:0 0 18px rgba(255,176,46,.35);opacity:0;transform:translateX(8px);transition:opacity .28s,transform .28s var(--ease)}
+.dial--anthem:hover .anthem__name,.dial--anthem:focus-within .anthem__name{opacity:1;transform:none}
+.knob .eq{width:22px;height:20px}
+.scroll-hint{position:fixed;bottom:28px;left:0;right:0;margin:0 auto;width:32px;height:52px;z-index:135;
+  display:grid;place-items:start center;padding-top:8px;border:1px solid var(--line);border-radius:999px;
+  background:rgba(5,7,5,.5);opacity:0;transition:opacity .5s ease}
 .scroll-hint.in{opacity:1}
+.scroll-hint.is-hidden{opacity:0;pointer-events:none}
 .scroll-hint i{width:3px;height:8px;border-radius:2px;background:var(--wick);animation:ki 1.9s ease-in-out infinite}
-@keyframes ki{0%{transform:translateY(0);opacity:0}30%{opacity:1}100%{transform:translateY(20px);opacity:0}}
-@media(max-width:860px){
-  .disc{font-size:8.5px;line-height:1.35;padding:4px 10px;letter-spacing:0}
-  .bar{flex-wrap:wrap;justify-content:center;gap:6px;padding:8px 14px}
-  nav{width:100%} nav ul{flex-wrap:wrap;justify-content:center;gap:14px 12px;font-size:9.5px;letter-spacing:.1em}
-  nav .cta{padding:7px 11px}
-  .brand{font-size:20px}
-  .rail--anthem,.scroll-hint{display:none}
-  .rail--ca{left:12px;right:12px;bottom:14px;justify-content:center}
-}
+@keyframes ki{0%{transform:translateY(0);opacity:0}30%{opacity:1}100%{transform:translateY(24px);opacity:0}}
 
 /* ── SECTION SYSTEM ───────────────────────────────────────────────────────── */
-.section{position:relative;z-index:2}
-.section--hero{min-height:100svh;z-index:5;pointer-events:none;isolation:isolate;
-  display:flex;align-items:center;background:transparent;padding-top:calc(var(--navh) + 84px)}
-.section--hero a,.section--hero button{pointer-events:all}
-.section--origin{padding:clamp(90px,14vh,160px) 0;
-  background:radial-gradient(ellipse 68% 38% at 50% 79%,rgba(0,255,65,.16) 0%,transparent 70%),
-             radial-gradient(ellipse 58% 34% at 58% 78%,rgba(255,176,46,.08) 0%,transparent 74%),
-             linear-gradient(180deg,rgba(5,7,5,.84),var(--bg) 60%)}
-/* THE PARALLAX BREAK — a 100vh pane whose background does not move with the page */
-.section--inflection{height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;
-  background-image:linear-gradient(rgba(5,7,5,.72),rgba(5,7,5,.86)),url('wick.png');
-  background-size:cover;background-position:center;background-attachment:fixed}
-.section--power{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:100px 5vw;overflow:hidden;background:var(--bg)}
-.section--howtobuy{min-height:100vh;display:flex;align-items:center;padding:100px 5vw;overflow:hidden;background:var(--bg)}
-.section--builds{min-height:100vh;display:flex;align-items:center;padding:100px 5vw;overflow:hidden;
-  background:radial-gradient(ellipse 55% 70% at 50% 46%,rgba(0,255,65,.07) 0%,transparent 70%),
-             radial-gradient(ellipse 36% 54% at 74% 58%,rgba(255,176,46,.04) 0%,transparent 74%),var(--bg)}
-.section--arcade{min-height:92vh;display:flex;align-items:center;overflow:hidden;padding:104px 5vw;
-  background:radial-gradient(ellipse 54% 72% at 76% 52%,rgba(0,255,65,.13) 0%,transparent 70%),var(--bg)}
-.section--anthem{overflow:hidden;padding:clamp(90px,12vh,150px) 5vw;
-  background:radial-gradient(ellipse 58% 54% at 50% 24%,rgba(0,255,65,.11) 0%,transparent 68%),var(--bg)}
-.section--ascend{min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:80px 5vw;background:var(--bg)}
-@media(max-width:860px){
-  /* iOS will not composite a fixed background — scroll it rather than ship a broken pane */
-  .section--inflection{background-attachment:scroll;height:auto;min-height:78vh;padding:90px 22px}
-}
+.section{position:relative;width:100%;z-index:2;scroll-margin-top:calc(var(--navh) + 86px)}
+.wrap{width:100%;max-width:1180px;margin:0 auto}
 
-/* ── HERO ─────────────────────────────────────────────────────────────────── */
-.hero__eyebrow{font:500 11px/1 var(--mono);letter-spacing:.42em;color:var(--wick);animation:eyebrow 3.2s ease-in-out infinite}
-@keyframes eyebrow{0%,100%{opacity:.5}50%{opacity:1}}
-.hero__title{font:400 clamp(56px,13vw,168px)/.84 var(--disp);letter-spacing:.01em;margin:.16em 0 .22em;
-  text-shadow:0 0 46px rgba(0,255,65,.28)}
-.hero__title em{font-style:normal;color:var(--wick)}
-.btn{display:inline-block;border:1px solid var(--wick);color:var(--wick);padding:14px 22px;border-radius:3px;
-  font:500 12px/1 var(--mono);letter-spacing:.22em;position:relative;overflow:hidden;transition:.2s}
-.btn:hover{background:rgba(0,255,65,.12)}
-.btn::after{content:'';position:absolute;top:0;left:-120%;width:60%;height:100%;
+/* 1 · HERO — transparent, the fixed pane shows through */
+.section--hero{min-height:100svh;z-index:5;pointer-events:none;isolation:isolate;background:transparent;overflow:hidden}
+.section--hero a,.section--hero button{pointer-events:all}
+.hero__scrim{position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(to right,var(--bg) 0%,rgba(5,7,5,.82) 18%,rgba(5,7,5,.42) 38%,transparent 58%)}
+.hero__vignette{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:.5;
+  background:radial-gradient(ellipse at 68% 50%,transparent 28%,rgba(5,7,5,.6) 100%)}
+.hero__content{position:absolute;top:50%;left:5vw;transform:translateY(-50%);z-index:3;
+  display:flex;flex-direction:column;align-items:flex-start;gap:24px;max-width:46vw}
+.hero__eyebrow{font:700 clamp(13px,1.3vw,20px)/1 var(--mono);letter-spacing:.3em;
+  background:linear-gradient(90deg,var(--wick) 0%,#9dffb4 52%,var(--gold) 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:var(--wick);
+  animation:eyebrow 3.4s ease-in-out infinite}
+@keyframes eyebrow{0%,100%{opacity:.55}50%{opacity:1}}
+.hero__lines{display:flex;flex-direction:column}
+.hero__linewrap{overflow:hidden;line-height:.85}
+.hero__line{display:block;font:400 clamp(62px,12vw,190px)/.85 var(--disp);letter-spacing:.035em;
+  text-shadow:0 0 46px rgba(0,255,65,.22);transform:translateY(105%);transition:transform 1s var(--ease)}
+.hero__line--wick{color:var(--wick);text-shadow:0 0 60px rgba(0,255,65,.5)}
+.lit .hero__line{transform:none}
+.hero__linewrap.open{overflow:visible}
+.lit .hero__linewrap:nth-child(2) .hero__line{transition-delay:.12s}
+.hero__lede{max-width:46ch}
+.hero__cta{display:flex;flex-wrap:wrap;gap:14px}
+
+.btn{position:relative;display:inline-flex;align-items:center;gap:8px;overflow:hidden;
+  border:1px solid var(--wick);color:var(--wick);padding:14px 22px;border-radius:3px;
+  font:500 12px/1 var(--mono);letter-spacing:.22em;transition:background .2s,box-shadow .2s,transform .2s}
+.btn:hover{background:rgba(0,255,65,.12);box-shadow:0 0 26px rgba(0,255,65,.2);transform:translateY(-2px)}
+.btn::after{content:'';position:absolute;top:0;left:-120%;width:60%;height:100%;pointer-events:none;
   background:linear-gradient(90deg,transparent,rgba(0,255,65,.22),transparent);animation:shine 4.5s ease-in-out infinite}
 @keyframes shine{0%,72%{left:-120%}88%,100%{left:170%}}
+.btn--ghost{border-color:var(--line);color:var(--dim)}
+.btn--ghost:hover{border-color:var(--gold);color:var(--gold);background:rgba(255,176,46,.08);box-shadow:0 0 26px rgba(255,176,46,.14)}
 
-/* ── THE ROTATING FEATURE: a light that orbits a card's edge ─────────────────
-   This is supersaiyan's htb-edge-orbit / creator-edge-orbit pattern. A conic
-   gradient spun behind the card, masked to a 1px ring, so the border itself
-   appears to have a travelling highlight.                                   */
-.card{position:relative;border:1px solid var(--line);border-radius:10px;background:rgba(5,7,5,.62);
-  padding:24px;overflow:hidden;transition:border-color .25s,transform .25s}
-.card:hover{border-color:rgba(0,255,65,.4);transform:translateY(-3px)}
-.card::before{content:'';position:absolute;inset:-1px;border-radius:inherit;padding:1px;
-  background:conic-gradient(from var(--orbit,0deg),transparent 0deg,rgba(0,255,65,.85) 26deg,rgba(255,176,46,.5) 44deg,transparent 82deg,transparent 360deg);
-  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;
-  animation:edge-orbit 6s linear infinite;opacity:.62;pointer-events:none}
-.card:nth-child(2)::before{animation-delay:-2s}
-.card:nth-child(3)::before{animation-delay:-4s}
-.card:hover::before{opacity:1}
+/* 2 · ORIGIN — 100vh split: copy left 46%, art column absolute right 50% */
+.section--origin{overflow:hidden;
+  background:radial-gradient(ellipse 46% 46% at 77% 58%,rgba(0,255,65,.16) 0%,transparent 66%),
+             radial-gradient(ellipse 38% 42% at 82% 58%,rgba(255,176,46,.09) 0%,transparent 72%),
+             linear-gradient(180deg,rgba(5,7,5,.82),#070a07 44%,#020402)}
+.section--origin::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.55;
+  background:linear-gradient(90deg,rgba(0,255,65,.05) 1px,transparent 1px) 0 0/112px 112px,
+             linear-gradient(rgba(0,255,65,.04) 1px,transparent 1px) 0 0/112px 112px;
+  -webkit-mask-image:radial-gradient(ellipse at 78% 58%,#000 0%,transparent 72%);
+          mask-image:radial-gradient(ellipse at 78% 58%,#000 0%,transparent 72%)}
+.origin__inner{position:relative;min-height:100vh;display:flex;align-items:center;padding:80px 8vw 80px 10vw;overflow:hidden}
+.origin__text{position:relative;z-index:2;width:100%;max-width:46%}
+.origin__text p+p{margin-top:16px}
+.origin__text .lede{max-width:52ch}
+.origin__art{position:absolute;right:0;top:0;width:50%;height:100%;z-index:1;overflow:hidden}
+.origin__art canvas{position:absolute;inset:0;width:100%;height:100%}
+.origin__art::before,.origin__art::after{content:'';position:absolute;pointer-events:none;border-radius:50%}
+.origin__art::before{width:min(44vw,620px);aspect-ratio:1;right:8%;top:26%;filter:blur(24px);opacity:.55;
+  background:radial-gradient(circle,rgba(0,255,65,.22) 0%,rgba(0,255,65,.07) 44%,transparent 70%)}
+.origin__art::after{width:min(38vw,520px);aspect-ratio:1;right:10%;top:31%;opacity:.75;
+  border:1px solid rgba(0,255,65,.42);box-shadow:0 0 44px rgba(0,255,65,.2),inset 0 0 60px rgba(0,255,65,.08)}
+.is-live .origin__art::after{animation:ring-breathe 6s ease-in-out infinite}
+@keyframes ring-breathe{0%,100%{transform:scale(1);opacity:.72}50%{transform:scale(1.045);opacity:1}}
+
+/* 3 · INFLECTION — the parallax break */
+.section--inflection{position:relative;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;
+  background-image:linear-gradient(rgba(5,7,5,.74),rgba(5,7,5,.88)),url('wick.png');
+  background-size:cover;background-position:center;background-attachment:fixed}
+.inflection__overlay{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 60% 60% at 50% 50%,transparent 20%,rgba(5,7,5,.72) 100%)}
+.inflection__flash{position:absolute;inset:0;pointer-events:none;opacity:0;
+  background:radial-gradient(ellipse 70% 40% at 50% 18%,rgba(0,255,65,.5) 0%,transparent 62%)}
+.is-live .inflection__flash{animation:flash 3.4s steps(1,end) infinite}
+@keyframes flash{0%,100%{opacity:0}2%{opacity:.75}4%{opacity:0}7%{opacity:.5}9%{opacity:0}
+                 46%{opacity:0}48%{opacity:.62}50%{opacity:0}}
+.inflection__quote{position:relative;z-index:1;text-align:center;max-width:20ch;padding:0 22px}
+.inflection__title{font:400 clamp(40px,7.5vw,104px)/.92 var(--disp);letter-spacing:.02em;text-shadow:0 0 60px rgba(0,255,65,.3)}
+.inflection__word{display:inline-block;opacity:0;transform:translateY(60%) scale(.94);filter:blur(12px);
+  transition:opacity .55s var(--ease),transform .6s var(--ease),filter .6s var(--ease);
+  transition-delay:calc(var(--w,0)*.055s)}
+.is-live .inflection__word{opacity:1;transform:none;filter:none}
+.inflection__attrib{margin-top:20px;font:500 10px/1 var(--mono);letter-spacing:.34em;color:var(--gold);opacity:0;
+  transition:opacity .7s var(--ease) .45s}
+.is-live .inflection__attrib{opacity:.85}
+
+/* 4 · POWER (their tokenomics) — a fixed 4-column grid of energy orbs */
+.section--power{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:100px 5vw;overflow:hidden;background:var(--bg)}
+.power__glow{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 54% 46% at 50% 46%,rgba(0,255,65,.09) 0%,transparent 68%)}
+.is-live .power__glow{animation:glow-breathe 4.6s ease-in-out infinite}
+@keyframes glow-breathe{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:1;transform:scale(1.05)}}
+.power__head{position:relative;z-index:1;text-align:center}
+.power__pulse{display:inline-flex;align-items:center;gap:14px;margin-bottom:44px;
+  font:500 10px/1 var(--mono);letter-spacing:.24em;color:rgba(0,255,65,.72)}
+.power__pulse b{position:relative;padding-left:14px;font-weight:500;color:var(--gold)}
+.power__pulse b::before{content:'';position:absolute;left:0;top:50%;width:6px;height:6px;border-radius:50%;
+  background:currentColor;box-shadow:0 0 14px currentColor;transform:translateY(-50%);animation:dot 1.8s ease-in-out infinite}
+@keyframes dot{0%,100%{opacity:.35;transform:translateY(-50%) scale(.8)}50%{opacity:1;transform:translateY(-50%) scale(1.15)}}
+.orbs{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(18px,2.4vw,34px);
+  width:100%;max-width:1180px}
+.orb{position:relative;aspect-ratio:1;cursor:pointer;opacity:0;transform:scale(.8);
+  transition:opacity .55s var(--ease),transform .6s cubic-bezier(.18,1.5,.4,1);transition-delay:calc(var(--i,0)*.12s)}
+.is-live .orb{opacity:1;transform:none}
+.orb:focus-visible{outline:2px solid rgba(0,255,65,.78);outline-offset:6px;border-radius:50%}
+.orb__inner{position:relative;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:20px;overflow:hidden;border-radius:50%;border:1px solid rgba(0,255,65,.5);
+  background:radial-gradient(circle at 36% 28%,rgba(233,255,233,.24) 0%,rgba(0,255,65,.1) 16%,transparent 38%),
+             radial-gradient(circle at 50% 60%,rgba(0,255,65,.16),rgba(255,176,46,.06) 48%,rgba(5,7,5,.62));
+  box-shadow:inset 0 0 34px rgba(0,255,65,.16),inset 0 0 74px rgba(255,176,46,.06),0 0 28px rgba(0,255,65,.14);
+  transition:border-color .3s,box-shadow .3s}
+.is-live .orb__inner{animation:orb-float 7s ease-in-out infinite,orb-glow 4.4s ease-in-out infinite}
+.is-live .orb:nth-child(2) .orb__inner{animation-delay:-1.5s,-.8s}
+.is-live .orb:nth-child(3) .orb__inner{animation-delay:-3.1s,-1.8s}
+.is-live .orb:nth-child(4) .orb__inner{animation-delay:-4.6s,-2.7s}
+@keyframes orb-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes orb-glow{0%,100%{box-shadow:inset 0 0 34px rgba(0,255,65,.16),inset 0 0 74px rgba(255,176,46,.06),0 0 28px rgba(0,255,65,.14)}
+                    50%{box-shadow:inset 0 0 46px rgba(0,255,65,.3),inset 0 0 92px rgba(255,176,46,.12),0 0 56px rgba(0,255,65,.3)}}
+.orb:hover .orb__inner{border-color:rgba(233,255,233,.9);box-shadow:inset 0 0 44px rgba(0,255,65,.32),0 12px 34px rgba(0,255,65,.28),0 18px 88px rgba(255,176,46,.16)}
+.orb__inner::before,.orb__inner::after{content:'';position:absolute;border-radius:50%;pointer-events:none}
+.orb__inner::before{inset:8%;border:1px solid rgba(233,255,233,.16);box-shadow:inset 0 0 22px rgba(0,255,65,.1)}
+.orb__inner::after{width:42%;height:16%;top:13%;left:19%;background:rgba(233,255,233,.16);filter:blur(10px);transform:rotate(-22deg)}
+.orb b{position:relative;z-index:1;display:block;font:400 clamp(26px,3.4vw,50px)/1 var(--disp);letter-spacing:.03em;color:var(--ink);
+  text-shadow:0 2px 6px rgba(0,0,0,.85),0 0 20px rgba(0,255,65,.35)}
+.orb--accent b{color:var(--wick)}
+.orb span{position:relative;z-index:1;display:block;margin-top:6px;padding:0 10px;text-align:center;
+  font:500 9px/1.5 var(--mono);letter-spacing:.2em;color:var(--dim)}
+.orb__shock{position:absolute;inset:0;pointer-events:none}
+.orb__shock::before,.orb__shock::after{content:'';position:absolute;top:50%;left:50%;width:130px;height:130px;
+  margin:-65px 0 0 -65px;border-radius:50%;opacity:0;pointer-events:none}
+.orb__shock::before{border:3px solid rgba(0,255,65,.9);box-shadow:0 0 50px rgba(0,255,65,.6)}
+.orb__shock::after{border:2px solid rgba(255,176,46,.85)}
+.orb.burst{z-index:5}
+.orb.burst .orb__shock::before{animation:shock .6s ease-out both}
+.orb.burst .orb__shock::after{animation:shock .52s ease-out .06s both}
+@keyframes shock{0%{opacity:1;transform:scale(.4)}100%{opacity:0;transform:scale(2.6)}}
+.orb.burst .orb__inner{animation:burst-flash .6s ease-out both}
+@keyframes burst-flash{0%{box-shadow:inset 0 0 60px rgba(233,255,233,.7),0 0 90px rgba(0,255,65,.7);border-color:#fff}
+                       100%{box-shadow:inset 0 0 34px rgba(0,255,65,.16),0 0 28px rgba(0,255,65,.14)}}
+.ca-line{position:relative;z-index:1;margin:36px auto 0;text-align:center;color:var(--dim);font-size:13px;max-width:66ch}
+.ca-line code{color:var(--ink);word-break:break-all;font-size:12px}
+.ca-line a{color:var(--wick)}
+
+/* 5 · HOW TO BUY — a fixed 3-column grid of step cards with a travelling edge light */
+.section--howtobuy{min-height:100vh;display:flex;align-items:center;padding:100px 5vw;overflow:hidden;background:var(--bg)}
+.htb__inner{position:relative;width:100%;max-width:1200px;margin:0 auto}
+.htb__steps-wrap{position:relative}
+.htb__gridwrap{position:relative}
+.htb__steps{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:40px}
+/* the connector runs only through the 40px gaps — never across a card face */
+.htb__join{position:absolute;top:50%;width:40px;height:1px;z-index:0;pointer-events:none;
+  background:linear-gradient(90deg,rgba(0,255,65,.05),rgba(0,255,65,.55),rgba(0,255,65,.05));
+  transform:scaleX(0);transform-origin:left center;transition:transform .9s var(--ease) .5s}
+.is-live .htb__join{transform:scaleX(1)}
+.htb__join--1{left:calc((100% - 80px)/3)}
+.htb__join--2{left:calc((100% - 80px)/3*2 + 40px)}
+.htb__join::after{content:'';position:absolute;top:-2px;left:0;width:5px;height:5px;border-radius:50%;
+  background:var(--wick);box-shadow:0 0 10px var(--wick);opacity:0}
+.is-live .htb__join::after{animation:join-run 3.8s linear infinite}
+@keyframes join-run{0%{left:0;opacity:0}12%{opacity:1}88%{opacity:1}100%{left:calc(100% - 5px);opacity:0}}
+.is-live .htb__join--2::after{animation-delay:-1.9s}
+.htb__step{position:relative;padding:48px 32px 40px;text-align:center;overflow:hidden;
+  background:rgba(233,255,233,.02);border:1px solid rgba(0,255,65,.1);
+  opacity:0;transform:translateY(52px) scale(.96);
+  transition:opacity .8s var(--ease),transform .8s var(--ease),border-color .3s,box-shadow .3s;
+  transition-delay:calc(var(--i,0)*.15s)}
+.is-live .htb__step{opacity:1;transform:none}
+.htb__step:hover{border-color:rgba(0,255,65,.28);box-shadow:0 0 36px rgba(0,255,65,.09);transform:translateY(-4px)}
+/* the travelling edge light — a conic gradient spun by an @property angle,
+   masked to a 1px ring, so the border itself carries a moving highlight */
+.htb__step::before{content:'';position:absolute;inset:-1px;padding:1px;opacity:0;pointer-events:none;
+  background:conic-gradient(from var(--orbit,0deg),transparent 0deg,transparent 54deg,
+             rgba(0,255,65,.9) 78deg,rgba(255,176,46,.7) 96deg,transparent 130deg,transparent 360deg);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+          mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude}
+.htb__step::after{content:'';position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .35s;
+  background:radial-gradient(circle at 50% 0%,rgba(0,255,65,.12),transparent 58%)}
+.is-live .htb__step::before{opacity:1;animation:edge-orbit 3.8s linear infinite}
+.is-live .htb__step::after{opacity:1;animation:card-breathe 3.4s ease-in-out infinite}
+.is-live .htb__step:nth-child(2)::before,.is-live .htb__step:nth-child(2)::after{animation-delay:-1.2s}
+.is-live .htb__step:nth-child(3)::before,.is-live .htb__step:nth-child(3)::after{animation-delay:-2.3s}
 @property --orbit{syntax:'<angle>';inherits:false;initial-value:0deg}
 @keyframes edge-orbit{to{--orbit:360deg}}
-/* fallback for engines without @property: rotate the layer itself */
+@keyframes card-breathe{0%,100%{opacity:.35}50%{opacity:1}}
+/* engines without @property still get a real travelling light: spin the layer */
 @supports not (background:conic-gradient(from var(--orbit,0deg),red,blue)){
-  .card::before{background:conic-gradient(transparent 0deg,rgba(0,255,65,.85) 26deg,transparent 82deg);animation:edge-spin 6s linear infinite}
+  .htb__step::before,.builds__panel::before,.builds__console::before{
+    background:conic-gradient(transparent 0deg,rgba(0,255,65,.9) 30deg,transparent 90deg);
+    animation-name:edge-spin!important}
   @keyframes edge-spin{to{transform:rotate(360deg)}}
 }
-.card h3{font:400 30px/1 var(--disp);letter-spacing:.04em;color:var(--wick);margin-bottom:8px}
-.card p{color:var(--dim);font-size:14px}
-.card .go{display:inline-block;margin-top:12px;font:500 10px/1 var(--mono);letter-spacing:.2em;color:var(--gold)}
-.grid{display:grid;gap:18px}
-.grid--3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.htb__step>*{position:relative;z-index:1}
+.htb__ghost{position:absolute;top:10px;right:20px;z-index:0;font:400 120px/1 var(--disp);color:rgba(0,255,65,.045);
+  pointer-events:none;transition:color .5s}
+.htb__step:hover .htb__ghost{color:rgba(0,255,65,.09)}
+.htb__icon{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:22px;height:44px}
+.htb__icon i{display:block;width:34px;height:34px;border-radius:9px;border:1px solid rgba(0,255,65,.35);
+  background:radial-gradient(circle at 40% 30%,rgba(0,255,65,.24),transparent 65%)}
+.is-live .htb__icon i{animation:icon-bob 3.2s ease-in-out infinite}
+.is-live .htb__icon i:nth-child(2){animation-delay:-1.1s}
+.is-live .htb__icon i:nth-child(3){animation-delay:-2.2s}
+@keyframes icon-bob{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-6px) rotate(6deg)}}
+.htb__num{font:500 10px/1 var(--mono);letter-spacing:.3em;color:var(--gold);margin-bottom:12px}
+.htb__step h3{font:400 clamp(28px,3vw,42px)/1 var(--disp);letter-spacing:.05em;color:var(--ink);margin-bottom:14px}
+.htb__step p{font-size:13px;line-height:1.7;color:rgba(233,255,233,.5)}
+.htb__step p strong{color:var(--wick);font-weight:600}
+.htb__foot{margin-top:56px;text-align:center;font:500 12px/1.7 var(--mono);letter-spacing:.05em;color:rgba(233,255,233,.34)}
+.htb__foot code{color:var(--wick);opacity:.72;word-break:break-all}
 
-/* ── INFLECTION QUOTE ─────────────────────────────────────────────────────── */
-.quote{text-align:center;max-width:20ch}
-.quote h2{font-size:clamp(40px,7.5vw,96px);line-height:.92;text-shadow:0 0 60px rgba(0,255,65,.3)}
-.quote .attrib{font:500 10px/1 var(--mono);letter-spacing:.34em;color:var(--gold);opacity:.8}
-
-/* ── POWER LEVEL — floating orbs ──────────────────────────────────────────── */
-.orbs{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:20px;width:100%;max-width:980px;margin-top:26px}
-.orb{position:relative;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;text-align:center;
-  border:1px solid var(--line);background:radial-gradient(circle at 50% 34%,rgba(0,255,65,.14),transparent 62%);
-  animation:orb-float 7s ease-in-out infinite}
-.orb:nth-child(2){animation-delay:-1.6s}.orb:nth-child(3){animation-delay:-3.2s}.orb:nth-child(4){animation-delay:-4.8s}
-@keyframes orb-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
-.orb::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:1px solid rgba(0,255,65,.18);animation:orb-pulse 3.6s ease-in-out infinite}
-@keyframes orb-pulse{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.06);opacity:.15}}
-.orb b{display:block;font:400 clamp(28px,4vw,46px)/1 var(--disp);color:var(--wick)}
-.orb span{font:500 10px/1.5 var(--mono);letter-spacing:.2em;color:var(--dim);margin-top:6px;display:block;padding:0 12px}
-.ca-line{margin-top:34px;text-align:center;color:var(--dim);font-size:13px;max-width:66ch}
-.ca-line code{color:var(--ink);word-break:break-all;font-size:12px}
-
-/* ── THE CREW — breathing glow + drifting grid (their creator-block motion) ── */
-.section--crew{position:relative;min-height:92vh;display:flex;align-items:center;overflow:hidden;padding:104px 5vw;
-  background:radial-gradient(ellipse 52% 66% at 24% 48%,rgba(0,255,65,.12) 0%,transparent 70%),
-             radial-gradient(ellipse 40% 50% at 78% 56%,rgba(255,176,46,.06) 0%,transparent 74%),var(--bg)}
+/* 6 · CREW (their team) — a draggable 3D ring on a perspective stage */
+.section--crew{min-height:100vh;display:flex;flex-direction:column;justify-content:center;gap:24px;
+  padding:calc(var(--navh) + 104px) 0 104px;overflow:hidden;
+  background:radial-gradient(ellipse 55% 70% at 50% 46%,rgba(0,255,65,.075) 0%,transparent 70%),
+             radial-gradient(ellipse 36% 54% at 74% 58%,rgba(255,176,46,.05) 0%,transparent 74%),var(--bg)}
 .crew__grid{position:absolute;inset:0;pointer-events:none;opacity:.4;
-  background-image:linear-gradient(rgba(0,255,65,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,65,.06) 1px,transparent 1px);
-  background-size:58px 58px;animation:crew-drift 24s linear infinite}
-@keyframes crew-drift{to{background-position:-58px 58px}}
-.crew__row{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;margin-top:30px}
-.crew__cell{border-left:2px solid var(--wick);padding:4px 0 4px 16px;animation:crew-breathe 5.5s ease-in-out infinite}
-.crew__cell:nth-child(2){animation-delay:-1.8s}.crew__cell:nth-child(3){animation-delay:-3.6s}
-@keyframes crew-breathe{0%,100%{border-left-color:rgba(0,255,65,.35)}50%{border-left-color:rgba(0,255,65,1)}}
-.crew__cell b{display:block;font:400 26px/1 var(--disp);letter-spacing:.05em;color:var(--wick);margin-bottom:6px}
-.crew__cell span{color:var(--dim);font-size:14px}
+  background-image:linear-gradient(rgba(0,255,65,.05) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(0,255,65,.05) 1px,transparent 1px);
+  background-size:58px 58px}
+.is-live .crew__grid{animation:grid-drift-y 24s linear infinite}
+@keyframes grid-drift-y{to{background-position:-58px 58px}}
+.crew__head,.crew__hint{position:relative;z-index:1;width:min(1180px,90vw);margin:0 auto}
+.crew__hint{font:500 11px/1 var(--mono);letter-spacing:.22em;color:rgba(0,255,65,.6)}
+.crew__stage{--cw:clamp(176px,14vw,224px);--ch:calc(var(--cw)*1.26);
+  position:relative;z-index:1;width:100%;height:clamp(350px,48vh,480px);margin-top:clamp(56px,8vh,100px);
+  perspective:1500px;perspective-origin:50% 50%;user-select:none;touch-action:pan-y;cursor:grab}
+.crew__stage.is-dragging{cursor:grabbing}
+.crew__stage:focus-visible{outline:1px solid rgba(0,255,65,.5);outline-offset:-2px}
+.crew__ring{position:absolute;top:58%;left:50%;width:var(--cw);height:var(--ch);
+  transform-style:preserve-3d;transform:translate(-50%,-50%);will-change:transform;pointer-events:none}
+.crew__card{position:absolute;inset:0;transform-style:preserve-3d;cursor:pointer;pointer-events:auto;will-change:transform,opacity}
+.crew__face,.crew__back{position:absolute;inset:0;overflow:hidden;border-radius:8px;border:1px solid rgba(0,255,65,.2);
+  background:#020402;box-shadow:0 18px 50px rgba(0,0,0,.5);
+  backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.crew__face{display:flex;flex-direction:column;justify-content:flex-end;gap:6px;padding:16px;
+  background:radial-gradient(ellipse at 50% 22%,rgba(0,255,65,.16) 0%,transparent 66%),linear-gradient(170deg,#0a120b,#020402);
+  transition:opacity .3s,border-color .3s,box-shadow .3s}
+.crew__back{transform:rotateY(180deg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  border-color:rgba(0,255,65,.32);
+  background:radial-gradient(ellipse at 50% 38%,rgba(0,255,65,.14) 0%,transparent 68%),linear-gradient(160deg,#0a120b,#020402)}
+.crew__back img{width:44%;max-width:120px;opacity:.9;filter:drop-shadow(0 0 18px rgba(0,255,65,.45))}
+.crew__back span{font:400 20px/1 var(--disp);letter-spacing:.1em;color:var(--wick);text-shadow:0 0 16px rgba(0,255,65,.5)}
+.crew__card.is-far .crew__face{opacity:0}
+.crew__card.is-far .crew__back{backface-visibility:visible;-webkit-backface-visibility:visible}
+.crew__card.is-active .crew__face{border-color:rgba(0,255,65,.62);box-shadow:0 24px 64px rgba(0,0,0,.55),0 0 34px rgba(0,255,65,.18)}
+.crew__card b{font:400 26px/1 var(--disp);letter-spacing:.05em;color:var(--wick)}
+.crew__card em{font:500 10px/1.5 var(--mono);font-style:normal;letter-spacing:.06em;color:var(--dim)}
+.crew__tag{position:absolute;top:12px;left:12px;padding:5px 9px;border-radius:999px;border:1px solid rgba(255,176,46,.5);
+  font:500 8px/1 var(--mono);letter-spacing:.14em;color:var(--gold);background:rgba(5,7,5,.7)}
+.crew__card.is-slot .crew__face{border-style:dashed;border-color:rgba(0,255,65,.18);
+  background:repeating-linear-gradient(135deg,rgba(0,255,65,.03) 0 8px,transparent 8px 16px),#020402}
+.crew__expand{position:absolute;top:10px;right:12px;z-index:2;width:26px;height:26px;display:grid;place-items:center;
+  border:1px solid rgba(0,255,65,.5);border-radius:50%;font:500 15px/1 var(--mono);color:var(--wick);
+  background:rgba(5,7,5,.6);opacity:0;transition:opacity .3s}
+.crew__card.is-active .crew__expand{opacity:.9}
+#crewDialog{position:fixed;inset:0;margin:auto;width:fit-content;height:fit-content;max-width:96vw;max-height:96vh;
+  border:0;padding:0;background:transparent;color:var(--ink);overflow:visible}
+#crewDialog::backdrop{background:rgba(5,7,5,.86);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px)}
+.crewdlg{position:relative;display:flex;flex-direction:column;align-items:center;gap:14px;
+  width:min(440px,92vw);padding:clamp(26px,5vw,38px);text-align:center;border-radius:18px;
+  border:1px solid rgba(0,255,65,.34);background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(0,255,65,.12),transparent 70%),rgba(6,9,6,.98);
+  box-shadow:0 40px 120px rgba(0,0,0,.62),0 0 60px rgba(0,255,65,.1);animation:pop .42s var(--ease)}
+@keyframes pop{from{opacity:0;transform:scale(.94) translateY(14px)}to{opacity:1;transform:none}}
+.crewdlg img{width:96px;border-radius:50%;border:1px solid rgba(0,255,65,.4)}
+.crewdlg b{font:400 40px/1 var(--disp);letter-spacing:.05em;color:var(--wick)}
+.crewdlg p{font-size:13px;color:var(--dim)}
+.crewdlg__close{position:absolute;top:-10px;right:-10px;width:42px;height:42px;display:grid;place-items:center;
+  border:1px solid rgba(0,255,65,.4);border-radius:50%;background:rgba(5,7,5,.94);transition:border-color .25s,transform .2s}
+.crewdlg__close:hover{border-color:var(--wick);transform:scale(1.06)}
 
-/* ── ARCADE — drifting grid + scan line ───────────────────────────────────── */
-.arcade__art{position:absolute;inset:0;pointer-events:none;opacity:.5;
-  background-image:linear-gradient(rgba(0,255,65,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,65,.07) 1px,transparent 1px);
-  background-size:46px 46px;animation:grid-drift 18s linear infinite}
-@keyframes grid-drift{to{background-position:46px 46px}}
-.arcade__scan{position:absolute;left:0;right:0;height:2px;pointer-events:none;
-  background:linear-gradient(90deg,transparent,rgba(0,255,65,.5),transparent);animation:scan 6.5s linear infinite}
-@keyframes scan{0%{top:-2%}100%{top:102%}}
+/* 7 · BUILDS (their creator) — copy left, a live console panel right */
+.section--builds{position:relative;min-height:100vh;display:flex;align-items:center;
+  padding:clamp(96px,12vw,150px) clamp(18px,5vw,76px);overflow:hidden;
+  background:radial-gradient(ellipse 48% 42% at 18% 20%,rgba(0,255,65,.11),transparent 70%),
+             radial-gradient(ellipse 42% 46% at 84% 68%,rgba(255,176,46,.09),transparent 74%),
+             linear-gradient(180deg,var(--bg),#080b09 48%,var(--bg))}
+.builds__grid{position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(rgba(0,255,65,.05) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(0,255,65,.05) 1px,transparent 1px);
+  background-size:64px 64px}
+.is-live .builds__grid{animation:grid-drift 12s linear infinite}
+@keyframes grid-drift{to{background-position:64px 64px}}
+.builds__glow{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 40% 44% at 78% 52%,rgba(0,255,65,.14),transparent 70%)}
+.is-live .builds__glow{animation:glow-breathe 4.8s ease-in-out infinite}
+.builds__inner{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,470px);
+  gap:clamp(30px,5vw,70px);align-items:center;max-width:1280px;margin:0 auto;width:100%}
+.builds__panel{position:relative;display:flex;flex-direction:column;gap:14px;width:100%;max-width:470px;margin:0 auto;
+  padding:clamp(16px,2vw,22px);overflow:hidden;border-radius:clamp(18px,2vw,26px);border:1px solid rgba(0,255,65,.22);
+  background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(0,255,65,.08),transparent 70%),rgba(5,7,5,.86);
+  box-shadow:0 0 0 1px rgba(255,176,46,.06),0 0 44px rgba(0,255,65,.12);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.builds__panel::before{content:'';position:absolute;inset:-1px;padding:1px;opacity:0;pointer-events:none;border-radius:inherit;
+  background:conic-gradient(from var(--orbit,0deg),transparent 0deg,rgba(0,255,65,.85) 58deg,rgba(255,176,46,.66) 84deg,transparent 122deg,transparent 360deg);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+          mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude}
+.is-live .builds__panel::before{opacity:1;animation:edge-orbit 4.8s linear infinite}
+.builds__bar{display:flex;align-items:center;gap:7px}
+.builds__bar i{width:10px;height:10px;border-radius:50%;background:rgba(0,255,65,.32)}
+.builds__bar i:nth-child(2){background:rgba(255,176,46,.32)}
+.builds__bar span{margin-left:auto;font:500 10px/1 var(--mono);letter-spacing:.26em;color:rgba(233,255,233,.5)}
+.builds__prompt{display:grid;gap:8px;padding:16px 18px;border-radius:14px;border:1px solid rgba(255,176,46,.18);
+  background:rgba(0,0,0,.42)}
+.builds__prompt em{font:500 10px/1 var(--mono);font-style:normal;letter-spacing:.24em;color:var(--gold)}
+.builds__prompt p{min-height:3.2em;font:400 15px/1.5 var(--mono);color:var(--ink)}
+.builds__prompt p::after{content:'▌';color:var(--wick);animation:caret 1s steps(1,end) infinite}
+@keyframes caret{0%,49%{opacity:1}50%,100%{opacity:0}}
+.builds__console{position:relative;display:flex;align-items:center;justify-content:center;aspect-ratio:16/10;
+  overflow:hidden;border-radius:14px;border:1px solid rgba(0,255,65,.16);
+  background:radial-gradient(circle at 50% 45%,rgba(0,255,65,.07),transparent 60%),
+             repeating-linear-gradient(45deg,rgba(0,255,65,.03) 0 2px,transparent 2px 8px),#020402}
+.builds__console::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:0;
+  background:linear-gradient(120deg,transparent 0%,rgba(255,176,46,.16) 48%,rgba(0,255,65,.18) 52%,transparent 100%);
+  transform:translateX(-120%)}
+.is-live .builds__console::after{animation:preview-scan 3.6s ease-in-out infinite}
+@keyframes preview-scan{0%{opacity:0;transform:translateX(-120%)}18%{opacity:1}82%{opacity:1}100%{opacity:0;transform:translateX(120%)}}
+.builds__slot{position:relative;z-index:1;text-align:center;padding:0 18px}
+.builds__slot b{display:block;font:400 clamp(26px,4vw,42px)/1 var(--disp);letter-spacing:.08em;color:var(--wick);
+  text-shadow:0 0 26px rgba(0,255,65,.4)}
+.builds__slot span{display:block;margin-top:8px;font:500 10px/1.6 var(--mono);letter-spacing:.16em;color:var(--dim)}
+.builds__foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.builds__foot em{font:500 10px/1 var(--mono);font-style:normal;letter-spacing:.14em;color:rgba(233,255,233,.45)}
+.builds__list{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;list-style:none}
+.builds__list a{display:inline-block;padding:8px 12px;border-radius:999px;border:1px solid var(--line);
+  font:500 10px/1 var(--mono);letter-spacing:.14em;color:var(--dim);transition:border-color .2s,color .2s,transform .2s}
+.builds__list a:hover{border-color:var(--wick);color:var(--wick);transform:translateY(-2px)}
 
-/* ── ANTHEM — EQ bars ─────────────────────────────────────────────────────── */
-.eq{display:flex;align-items:flex-end;gap:4px;height:44px}
-.eq i{width:4px;background:linear-gradient(180deg,var(--wick),rgba(0,255,65,.25));border-radius:2px;animation:eq 1.1s ease-in-out infinite}
+/* 8 · ARCADE (their game) — copy left, a big framed visual right */
+.section--arcade{position:relative;min-height:92vh;display:flex;align-items:center;overflow:hidden;padding:104px 5vw;
+  background:radial-gradient(ellipse 54% 72% at 76% 52%,rgba(0,255,65,.14) 0%,transparent 70%),
+             radial-gradient(ellipse 34% 54% at 78% 54%,rgba(255,176,46,.07) 0%,transparent 72%),var(--bg)}
+.arcade__grid{position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(rgba(0,255,65,.06) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(0,255,65,.06) 1px,transparent 1px);
+  background-size:46px 46px}
+.is-live .arcade__grid{animation:grid-drift-alt 10s linear infinite}
+@keyframes grid-drift-alt{to{background-position:46px -46px}}
+.arcade__glow{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 42% 46% at 76% 52%,rgba(0,255,65,.12),transparent 70%)}
+.is-live .arcade__glow{animation:glow-breathe 4.5s ease-in-out infinite}
+.arcade__inner{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,.92fr) minmax(340px,.72fr);
+  align-items:center;gap:clamp(44px,8vw,120px);width:min(1280px,100%);margin:0 auto}
+.arcade__frame{position:relative;min-height:430px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;overflow:hidden;border-radius:clamp(22px,2.6vw,38px);border:1px solid rgba(0,255,65,.36);
+  background:radial-gradient(circle at 50% 31%,rgba(0,255,65,.2) 0%,transparent 32%),
+             radial-gradient(ellipse 70% 60% at 50% 90%,rgba(255,176,46,.08),transparent 70%),#040604;
+  transition:filter .35s var(--ease)}
+.arcade__frame:hover{filter:drop-shadow(0 0 30px rgba(0,255,65,.35))}
+.arcade__frame>*{position:relative;z-index:1}
+.arcade__frame::before,.arcade__frame::after{content:'';position:absolute;left:-40%;width:180%;height:1px;z-index:0;
+  background:linear-gradient(90deg,transparent,rgba(0,255,65,.65),transparent);transform:rotate(-28deg)}
+.arcade__frame::before{top:24%}
+.arcade__frame::after{bottom:24%}
+.is-live .arcade__frame::before{animation:scan-diag 2.6s ease-in-out infinite}
+.is-live .arcade__frame::after{animation:scan-diag 2.6s ease-in-out -1.3s infinite reverse}
+@keyframes scan-diag{0%,100%{transform:translateY(-120px) rotate(-28deg);opacity:0}
+                     18%{opacity:1}82%{opacity:1}
+                     50%{transform:translateY(120px) rotate(-28deg)}}
+.arcade__status{position:absolute;top:18px;left:20px;z-index:2;display:flex;align-items:center;gap:8px;
+  font:500 9px/1 var(--mono);letter-spacing:.2em;color:rgba(233,255,233,.6)}
+.arcade__status i{width:7px;height:7px;border-radius:50%;background:var(--wick);box-shadow:0 0 14px var(--wick);
+  animation:dot 1.8s ease-in-out infinite}
+.arcade__frame img{width:clamp(104px,11vw,160px);filter:drop-shadow(0 0 30px rgba(0,255,65,.5))}
+.arcade__frame strong{font:400 clamp(36px,3.9vw,60px)/.86 var(--disp);font-weight:400;letter-spacing:.06em;text-align:center;
+  color:var(--wick);text-shadow:0 0 28px rgba(0,255,65,.36)}
+.arcade__frame em{max-width:34ch;text-align:center;font:500 9px/1.7 var(--mono);font-style:normal;letter-spacing:.22em;
+  color:rgba(233,255,233,.58)}
+
+/* 9 · ANTHEM (their music) — a centred 880px column of track rows */
+.section--anthem{position:relative;overflow:hidden;padding:clamp(90px,12vh,150px) 5vw;
+  background:radial-gradient(ellipse 58% 54% at 50% 24%,rgba(0,255,65,.12) 0%,transparent 68%),
+             radial-gradient(ellipse 42% 54% at 82% 58%,rgba(255,176,46,.08) 0%,transparent 74%),
+             linear-gradient(180deg,#080b08,var(--bg) 48%,#070907)}
+.anthem__inner{position:relative;z-index:1;width:100%;max-width:880px;margin:0 auto}
+.anthem__head{text-align:center;margin-bottom:clamp(28px,5vh,52px)}
+.anthem__head .lede{margin:0 auto}
+.anthem__list{display:flex;flex-direction:column;gap:12px;list-style:none}
+.anthem__track{display:flex;align-items:center;gap:16px;padding:16px 20px;border-radius:18px;
+  border:1px solid rgba(0,255,65,.14);background:linear-gradient(135deg,rgba(0,255,65,.04),rgba(255,176,46,.02)),rgba(233,255,233,.02);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  transition:border-color .3s,background .3s,transform .3s var(--ease)}
+.anthem__track:hover{border-color:rgba(0,255,65,.34);transform:translateX(4px)}
+.anthem__mark{flex:0 0 auto;width:42px;height:42px;display:grid;place-items:center;border-radius:50%;
+  border:1px solid rgba(255,176,46,.4);color:var(--gold);font:400 18px/1 var(--disp)}
+.anthem__meta{flex:1 1 auto;min-width:0}
+.anthem__meta b{display:block;font:400 24px/1 var(--disp);letter-spacing:.06em;color:var(--ink)}
+.anthem__meta span{display:block;margin-top:4px;font:500 10px/1.4 var(--mono);letter-spacing:.16em;color:var(--dim)}
+.pending{flex:0 0 auto;font:500 10px/1 var(--mono);letter-spacing:.2em;color:var(--gold);
+  border:1px solid rgba(255,176,46,.4);padding:8px 11px;border-radius:999px;white-space:nowrap}
+.eq{display:flex;align-items:flex-end;justify-content:center;gap:3px;height:26px;flex:0 0 auto}
+.eq i{width:3px;min-height:22%;background:linear-gradient(180deg,var(--wick),rgba(0,255,65,.25));border-radius:2px;
+  animation:eq 1.1s ease-in-out infinite}
 .eq i:nth-child(2){animation-delay:-.9s}.eq i:nth-child(3){animation-delay:-.7s}.eq i:nth-child(4){animation-delay:-.5s}
 .eq i:nth-child(5){animation-delay:-.3s}.eq i:nth-child(6){animation-delay:-.15s}.eq i:nth-child(7){animation-delay:-.55s}
-@keyframes eq{0%,100%{height:18%}50%{height:100%}}
-.anthem__box{display:flex;align-items:center;gap:22px;flex-wrap:wrap;border:1px solid var(--line);border-radius:10px;padding:24px;background:rgba(5,7,5,.6)}
-.pending{font:500 10px/1 var(--mono);letter-spacing:.2em;color:var(--gold);border:1px solid rgba(255,176,46,.4);padding:7px 10px;border-radius:999px}
+@keyframes eq{0%,100%{height:22%}50%{height:100%}}
+.eq--idle i{animation-duration:2.4s;opacity:.45}
 
-/* ── FOOTER ───────────────────────────────────────────────────────────────── */
-.foot__links{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;font:500 11px/1 var(--mono);letter-spacing:.2em;color:var(--dim);margin-top:26px}
-.foot__links a:hover{color:var(--wick)}
-.fineprint{margin-top:30px;color:var(--dim);font-size:12px;max-width:70ch;text-align:center;opacity:.8}
-.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
-.reveal.in{opacity:1;transform:none}
+/* 10 · ASCEND (their footer) */
+.section--ascend{min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;
+  padding:90px 5vw;background:var(--bg)}
+.ascend__inner{display:flex;flex-direction:column;align-items:center;gap:34px;width:100%;max-width:900px;text-align:center}
+.ascend__inner h2{margin:0}
+.foot__links{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;
+  font:500 11px/1 var(--mono);letter-spacing:.2em;color:var(--dim)}
+.foot__links a{transition:color .2s,transform .2s}
+.foot__links a:hover{color:var(--wick);transform:translateY(-3px)}
+.fineprint{color:var(--dim);font-size:12px;max-width:70ch;opacity:.8}
+.fineprint a{color:var(--wick)}
+
+/* ── BUY MODAL — the reader picks the venue, we do not pick for them ──────── */
+.buy{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;padding:24px;
+  background:rgba(2,4,2,.76);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.buy[hidden]{display:none!important}
+.buy__panel{position:relative;width:min(460px,100%);max-height:92vh;overflow:auto;padding:clamp(24px,5vw,36px);
+  border-radius:22px;border:1px solid rgba(0,255,65,.3);text-align:center;
+  background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(0,255,65,.12),transparent 70%),rgba(6,9,6,.99);
+  box-shadow:0 30px 90px rgba(0,0,0,.6),0 0 50px rgba(0,255,65,.1);animation:pop .32s var(--ease)}
+.buy__close{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;
+  border:1px solid rgba(0,255,65,.3);background:rgba(0,255,65,.06);color:var(--wick);font-size:14px}
+.buy__close:hover{border-color:var(--wick);background:rgba(0,255,65,.14)}
+.buy h3{font:400 clamp(32px,7vw,46px)/1 var(--disp);letter-spacing:.04em;color:var(--ink)}
+.buy h3 span{color:var(--wick)}
+.buy__sub{margin:10px 0 22px;font:500 12px/1.6 var(--mono);color:rgba(233,255,233,.6)}
+.buy__opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.buy__opt{display:grid;justify-items:center;align-content:start;gap:8px;padding:20px 12px;border-radius:16px;
+  border:1px solid rgba(0,255,65,.22);background:rgba(233,255,233,.03);color:var(--ink);text-align:center;
+  transition:border-color .22s,transform .22s var(--ease),box-shadow .22s}
+.buy__opt:hover,.buy__opt:focus-visible{border-color:var(--wick);transform:translateY(-3px);box-shadow:0 12px 30px rgba(0,255,65,.16);outline:none}
+.buy__opt i{display:grid;place-items:center;width:44px;height:44px;border-radius:13px;
+  border:1px solid rgba(0,255,65,.3);background:radial-gradient(circle at 40% 30%,rgba(0,255,65,.22),transparent 66%);
+  font:400 20px/1 var(--disp);color:var(--wick);font-style:normal}
+.buy__opt b{font:500 13px/1 var(--mono);letter-spacing:.06em;font-weight:500}
+.buy__opt span{font:500 10px/1.4 var(--mono);letter-spacing:.04em;color:rgba(233,255,233,.5)}
+.buy__ca{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);
+  font:500 10px/1.7 var(--mono);letter-spacing:.06em;color:rgba(233,255,233,.45)}
+.buy__ca code{display:block;margin:6px 0 10px;color:var(--wick);word-break:break-all;font-size:11px;opacity:.85}
+.buy__note{margin-top:14px;font:500 10px/1.6 var(--mono);color:rgba(233,255,233,.38)}
+
+/* ── RESPONSIVE ───────────────────────────────────────────────────────────── */
+@media(max-width:1180px){
+  .hero__content{left:6vw;max-width:60vw}
+  .builds__inner,.arcade__inner{gap:clamp(30px,5vw,60px)}
+}
+@media(max-width:900px){
+  .disc__full{display:none}
+  .disc__short{display:inline}
+  .disc{padding:6px 12px;min-height:0;font-size:9px;letter-spacing:.04em}
+  header{padding:12px 18px;gap:10px}
+  .nav__links{display:none}
+  .nav__mini{display:flex}
+  .brand{font-size:18px}.brand img{width:26px;height:26px}
+  .hero__content{top:26%;left:6vw;transform:none;max-width:88vw;gap:16px}
+  .hero__line{font-size:clamp(56px,17vw,104px)}
+  .hero__scrim{background:linear-gradient(to right,var(--bg),rgba(5,7,5,.92) 30%,rgba(5,7,5,.64) 58%,rgba(5,7,5,.16))}
+  .hero__vignette{opacity:.7;background:linear-gradient(to bottom,rgba(5,7,5,.5) 0%,transparent 32%,rgba(5,7,5,.72) 100%)}
+  .origin__inner{flex-direction:column;justify-content:center;align-items:flex-start;height:auto;min-height:100svh;
+    padding:96px 6vw 64px;gap:20px}
+  .origin__text{max-width:100%}
+  .origin__art{position:relative;right:auto;top:auto;width:100%;height:min(42vh,340px)}
+  .origin__art::before{width:min(84vw,360px);right:50%;top:6%;transform:translateX(50%)}
+  .origin__art::after{width:min(76vw,320px);right:50%;top:12%;transform:translateX(50%)}
+  .orbs{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;max-width:760px}
+  .orb__inner{padding:12px}
+  .htb__steps{grid-template-columns:1fr;gap:24px}
+  .htb__step{padding:40px 24px 32px}
+  .htb__join{display:none}
+  .crew__head,.crew__hint{width:88vw}
+  .crew__stage{--cw:clamp(136px,40vw,172px);height:clamp(330px,48vh,430px);margin-top:38px;perspective:980px}
+  .builds__inner,.arcade__inner{grid-template-columns:1fr;gap:34px}
+  .builds__panel{max-width:100%}
+  .arcade__frame{min-height:330px}
+  .arcade__frame strong{font-size:clamp(38px,11vw,60px)}
+  .section--arcade,.section--builds{min-height:auto;padding:88px 6vw}
+  .section--power,.section--howtobuy{padding:90px 6vw}
+  .section--crew{padding:82px 0 64px}
+  .dial{bottom:calc(18px + env(safe-area-inset-bottom,0px))}
+  .dial--ca{left:5vw}.dial--anthem{right:5vw}
+  .knob{width:56px;height:56px;font-size:13px}
+  .anthem__name{display:none}
+  .scroll-hint{width:28px;height:46px;bottom:calc(22px + env(safe-area-inset-bottom,0px))}
+  .ca__panel{position:absolute;left:0;bottom:68px;width:min(84vw,380px);transform:translateY(8px) scale(.97);transform-origin:left bottom}
+  .dial.is-open .ca__panel{transform:none}
+  /* iOS cannot composite a fixed background — scroll it rather than ship a broken pane */
+  .section--inflection{background-attachment:scroll;height:auto;min-height:88svh;padding:100px 22px}
+  .section--hero,.section--ascend{min-height:100svh}
+}
+@media(max-width:560px){
+  header{padding:10px 14px}
+  .brand{font-size:16px;gap:7px}.brand img{width:22px;height:22px}
+  .nav__mini{gap:9px}.nav__mini svg{width:18px;height:18px}
+  .nav__mini .nav__cta{font-size:8px;padding:6px 8px;letter-spacing:.1em}
+  .hero__line{font-size:clamp(52px,19vw,92px)}
+  .hero__eyebrow{font-size:12px;letter-spacing:.18em}
+  .buy__opts{grid-template-columns:1fr}
+  .anthem__track{flex-wrap:wrap;padding:13px 14px;gap:10px 12px}
+  .anthem__meta{flex:1 1 100%;order:2}
+  .anthem__track .eq{order:1}
+  .pending{order:3;margin-left:auto}
+  .anthem__meta b{font-size:20px}
+  .orbs{gap:12px}
+  .orb span{font-size:8px;letter-spacing:.14em}
+}
 </style>
 </head>
 <body>
 
-<!-- ── GATE ─────────────────────────────────────────────────────────────── -->
+<!-- ── ENTRY GATE ─────────────────────────────────────────────────────────── -->
 <div id="gate">
   <div class="tick">$WICK // SYS_INIT_v2.0</div>
+  <div class="boot" id="boot"></div>
   <div id="bolt"></div>
   <img id="gatemark" src="wick.png" alt="$WICK">
   <div class="tap">TAP TO LIGHT THE WICK</div>
 </div>
 
-<!-- ── THE FIXED PANE — one canvas behind the whole scroll ───────────────── -->
+<!-- ── THE FIXED PANE — one layer behind the whole scroll ─────────────────── -->
 <canvas id="wick-canvas"></canvas>
 <div id="wick-veil"></div>
 
-<!-- ── FIXED CHROME ─────────────────────────────────────────────────────── -->
-<div class="disc">Not affiliated with John Wick, Lionsgate, or any film studio — original, community-driven art &amp; concepts. Nothing here is financial advice.</div>
+<!-- ── FIXED FURNITURE ────────────────────────────────────────────────────── -->
+<div class="disc">
+  <span class="disc__full">Not affiliated with John Wick, Lionsgate, or any film studio — original, community-driven art &amp; concepts. Nothing here is financial advice.</span>
+  <span class="disc__short">Not affiliated with John Wick or Lionsgate. Not financial advice.</span>
+</div>
+
 <header>
-  <div class="bar">
-    <a class="brand" href="#hero"><img src="wick.png" alt="">$WICK</a>
-    <nav><ul>
-      <li><a href="#hero">HOME</a></li>
-      <li><a href="#origin">ORIGIN</a></li>
-      <li><a href="#power">POWER</a></li>
-      <li><a href="#howtobuy">HOW TO BUY</a></li>
-      <li><a href="#crew">CREW</a></li>
-      <li><a href="#builds">BUILDS</a></li>
-      <li><a href="#arcade">PLAY</a></li>
-      <li><a class="cta" href="https://swap.wick.pics">BUY $WICK</a></li>
-    </ul></nav>
+  <a class="brand" href="#hero"><img src="wick.png" alt="">$WICK</a>
+  <ul class="nav__links">
+    <li><a href="#hero">HOME</a></li>
+    <li><a href="#origin">ORIGIN</a></li>
+    <li><a href="#power">POWER</a></li>
+    <li><a href="#howtobuy">HOW TO BUY</a></li>
+    <li><a href="#crew">CREW</a></li>
+    <li><a href="#builds">BUILDS</a></li>
+    <li><a href="#arcade">PLAY</a></li>
+    <li><a class="nav__cta" href="#" data-buy>BUY $WICK</a></li>
+  </ul>
+  <div class="nav__mini">
+    <a href="https://games.wick.pics" aria-label="The arcade">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 8h10a5 5 0 0 1 4.9 4l.8 4a3 3 0 0 1-5.5 2.2L15.6 16H8.4l-1.6 2.2A3 3 0 0 1 1.3 16l.8-4A5 5 0 0 1 7 8Zm-1 3v2H4v2h2v2h2v-2h2v-2H8v-2H6Zm10 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm2 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"/></svg>
+    </a>
+    <a href="https://x.com/GreenWickAI" aria-label="X / Twitter">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.2 2.3h3.3l-7.2 8.2 8.5 11.2h-6.7l-4.7-6.2-5.4 6.2H2.7l7.7-8.8L1.3 2.3h6.8l4.3 5.6 5.8-5.6Zm-1.2 17.5h1.9L7.1 4.1H5.1l11.9 15.7Z"/></svg>
+    </a>
+    <a href="https://t.me/MrGreenWick" aria-label="Telegram">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0a12 12 0 1 0 0 24 12 12 0 0 0 0-24Zm5 7.2c.15 0 .38.05.5.15.1.1.14.24.15.34 0 .1 0 .3-.02.46-.18 1.9-.96 6.5-1.36 8.63-.17.9-.5 1.2-.82 1.23-.7.06-1.23-.46-1.9-.9-1.06-.7-1.65-1.13-2.68-1.8-1.19-.78-.42-1.21.26-1.91.17-.18 3.24-2.98 3.3-3.23a.24.24 0 0 0-.05-.21c-.07-.06-.18-.04-.25-.03-.1.03-1.8 1.15-5.06 3.35-.48.33-.91.49-1.3.48-.43 0-1.25-.24-1.87-.44-.75-.25-1.35-.38-1.3-.79.03-.22.33-.44.9-.67 3.5-1.52 5.83-2.53 7-3.01 3.33-1.39 4.02-1.63 4.47-1.64Z"/></svg>
+    </a>
+    <a class="nav__cta" href="#" data-buy>BUY</a>
   </div>
 </header>
 
-<div class="rail rail--ca" id="railCa">
-  <span class="chip">CA</span>
-  <button id="copyCa" title="Copy contract address">0x8CDa…9cfC ⧉</button>
+<div class="dial dial--ca" id="dialCa">
+  <button class="knob" id="caKnob" aria-expanded="false" aria-controls="caPanel" title="Contract address">CA</button>
+  <div class="ca__panel" id="caPanel">
+    <span class="ca__label">CA</span>
+    <span class="ca__addr" id="caAddr">0x8CDaf3d630Da9E1450832924D5701CC0500E9cfC</span>
+    <button class="ca__copy" data-copy><span data-copy-label>COPY</span> ⧉</button>
+    <a class="ca__buy" href="#" data-buy>BUY $WICK</a>
+  </div>
 </div>
-<div class="rail rail--anthem" id="railAnthem">
-  <span class="chip" id="anthemChip">ANTHEM — SOON</span>
-</div>
-<div class="scroll-hint" id="scrollHint"><i></i></div>
 
-<!-- ── 1. HERO (transparent — the fixed pane shows through) ──────────────── -->
+<div class="dial dial--anthem" id="dialAnthem">
+  <span class="anthem__name">ANTHEM — NOT UPLOADED YET</span>
+  <a class="knob" href="#anthem" title="The anthem section" aria-label="Jump to the anthem section">
+    <span class="eq eq--idle" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+  </a>
+</div>
+
+<button class="scroll-hint" id="scrollHint" aria-label="Scroll down"><i></i></button>
+
+<!-- ══ 1 · HERO ═══════════════════════════════════════════════════════════ -->
 <section class="section section--hero" id="hero">
-  <div class="wrap">
+  <div class="hero__scrim"></div>
+  <div class="hero__vignette"></div>
+  <div class="hero__content">
     <div class="hero__eyebrow">NEVER KILL A FROG'S DOG</div>
-    <h1 class="hero__title">LIGHT<br>THE <em>WICK</em></h1>
-    <p class="lede">A frog with a gun and a grudge — and behind him, an AI company that actually ships.
+    <div class="hero__lines">
+      <div class="hero__linewrap"><span class="hero__line">LIGHT THE</span></div>
+      <div class="hero__linewrap"><span class="hero__line hero__line--wick">WICK</span></div>
+    </div>
+    <p class="lede hero__lede">A frog with a gun and a grudge — and behind him, an AI company that actually ships.
       $WICK on PulseChain: games, tools and live products, built in the open.</p>
-    <p style="margin-top:26px"><a class="btn" href="https://swap.wick.pics">BUY $WICK →</a></p>
+    <div class="hero__cta">
+      <a class="btn" href="#" data-buy>BUY $WICK →</a>
+      <a class="btn btn--ghost" href="#origin">THE STORY</a>
+    </div>
   </div>
 </section>
 
-<!-- ── 2. ORIGIN ────────────────────────────────────────────────────────── -->
+<!-- ══ 2 · ORIGIN ═════════════════════════════════════════════════════════ -->
 <section class="section section--origin" id="origin">
-  <div class="wrap reveal">
-    <div class="lbl">ORIGIN STORY</div>
-    <h2>THEY TOOK<br>HIS DOG.</h2>
-    <p class="lede">Every good story starts with a debt someone has to settle. Ours starts with a frog,
-      a stolen dog, and a very large amount of patience running out.</p>
-    <p class="lede" style="margin-top:16px">$WICK is the ticker for that grudge — and the front door to everything
-      Green Wick builds: autonomous agents, on-chain tools, and games you can actually play.
-      Mostly working. All shipped.</p>
+  <div class="origin__inner">
+    <div class="origin__text">
+      <span class="lbl rv" style="--i:0">ORIGIN STORY</span>
+      <h2 class="rv" style="--i:1">THEY TOOK<br>HIS DOG.</h2>
+      <p class="lede rv" style="--i:2">Every good story starts with a debt someone has to settle. Ours starts with a frog,
+        a stolen dog, and a very large amount of patience running out.</p>
+      <p class="lede rv" style="--i:3">$WICK is the ticker for that grudge — and the front door to everything
+        Green Wick builds: autonomous agents, on-chain tools, and games you can actually play.
+        Mostly working. All shipped.</p>
+      <p class="rv" style="--i:4;margin-top:26px"><a class="btn btn--ghost" href="#power">THE NUMBERS →</a></p>
+    </div>
+    <div class="origin__art"><canvas id="origin-particles" aria-hidden="true"></canvas></div>
   </div>
 </section>
 
-<!-- ── 3. INFLECTION — the 100vh parallax break ──────────────────────────── -->
+<!-- ══ 3 · INFLECTION — the parallax break ════════════════════════════════ -->
 <section class="section section--inflection" id="inflection">
-  <div class="quote reveal">
-    <h2>NEVER KILL<br>A FROG'S DOG.</h2>
-    <div class="attrib">— THE ONLY RULE</div>
+  <div class="inflection__overlay"></div>
+  <div class="inflection__flash"></div>
+  <div class="inflection__quote">
+    <h2 class="inflection__title" id="inflectionTitle">NEVER KILL A FROG'S DOG.</h2>
+    <div class="inflection__attrib">— THE ONLY RULE</div>
   </div>
 </section>
 
-<!-- ── 4. POWER LEVEL ───────────────────────────────────────────────────── -->
+<!-- ══ 4 · POWER (tokenomics) ═════════════════════════════════════════════ -->
 <section class="section section--power" id="power">
-  <div class="reveal" style="text-align:center;width:100%;max-width:1180px">
-    <div class="lbl">POWER LEVEL</div>
-    <h2>TOKEN<br>OMICS.</h2>
-    <div class="orbs">
-      <div class="orb"><div><b>11.1M</b><span>TOTAL SUPPLY</span></div></div>
-      <div class="orb"><div><b>0%</b><span>BUY / SELL TAX</span></div></div>
-      <div class="orb"><div><b>LOCKED</b><span>LP LOCKED &amp; BURNED</span></div></div>
-      <div class="orb"><div><b>PLS</b><span>PULSECHAIN</span></div></div>
-    </div>
-    <p class="ca-line" style="margin-left:auto;margin-right:auto">Contract:
-      <code>0x8CDaf3d630Da9E1450832924D5701CC0500E9cfC</code> —
-      verify it yourself at <a href="https://onchain.wick.pics" style="color:var(--wick)">onchain.wick.pics</a>,
-      our own rug &amp; honeypot checker.</p>
+  <div class="power__glow"></div>
+  <div class="power__head">
+    <span class="lbl rv" style="--i:0">POWER LEVEL</span>
+    <h2 class="rv" style="--i:1">TOKENOMICS.</h2>
+    <div class="power__pulse rv" style="--i:2">PULSECHAIN <b>LIVE</b></div>
   </div>
+  <div class="orbs">
+    <div class="orb orb--accent" style="--i:0" tabindex="0" role="button" aria-label="Total supply: 11.1 million">
+      <div class="orb__inner"><b>11.1M</b><span>TOTAL SUPPLY</span></div><div class="orb__shock"></div></div>
+    <div class="orb" style="--i:1" tabindex="0" role="button" aria-label="Buy and sell tax: zero percent">
+      <div class="orb__inner"><b>0%</b><span>BUY / SELL TAX</span></div><div class="orb__shock"></div></div>
+    <div class="orb" style="--i:2" tabindex="0" role="button" aria-label="Liquidity: locked and burned">
+      <div class="orb__inner"><b>BURNED</b><span>LP LOCKED &amp; BURNED</span></div><div class="orb__shock"></div></div>
+    <div class="orb" style="--i:3" tabindex="0" role="button" aria-label="Chain: PulseChain">
+      <div class="orb__inner"><b>PLS</b><span>PULSECHAIN</span></div><div class="orb__shock"></div></div>
+  </div>
+  <p class="ca-line rv" style="--i:4">Contract:
+    <code>0x8CDaf3d630Da9E1450832924D5701CC0500E9cfC</code> —
+    verify it yourself at <a href="https://onchain.wick.pics">onchain.wick.pics</a>, our own rug &amp; honeypot checker.</p>
 </section>
 
-<!-- ── 5. HOW TO BUY — orbiting cards ───────────────────────────────────── -->
+<!-- ══ 5 · HOW TO BUY ═════════════════════════════════════════════════════ -->
 <section class="section section--howtobuy" id="howtobuy">
-  <div class="wrap reveal">
-    <div class="lbl">HOW TO BUY</div>
-    <h2>THREE STEPS.</h2>
-    <div class="grid grid--3">
-      <div class="card"><h3>WALLET</h3><p>Install MetaMask or Rabby and add the PulseChain network. Takes a minute, costs nothing.</p></div>
-      <div class="card"><h3>GET PLS</h3><p>Bridge or buy PLS — it's the gas and the pair. Keep a little spare for fees.</p></div>
-      <div class="card"><h3>SWAP</h3><p>Use our own aggregator at swap.wick.pics: it checks five routes and takes the best one.</p></div>
+  <div class="htb__inner">
+    <span class="lbl rv" style="--i:0">HOW TO BUY</span>
+    <h2 class="rv" style="--i:1">THREE STEPS.</h2>
+    <div class="htb__steps-wrap">
+      <div class="htb__gridwrap">
+      <i class="htb__join htb__join--1" aria-hidden="true"></i>
+      <i class="htb__join htb__join--2" aria-hidden="true"></i>
+      <div class="htb__steps">
+        <div class="htb__step" style="--i:0">
+          <div class="htb__ghost">01</div>
+          <div class="htb__icon"><i></i><i></i></div>
+          <div class="htb__num">STEP 01</div>
+          <h3>WALLET</h3>
+          <p>Install <strong>MetaMask</strong> or <strong>Rabby</strong> and add the PulseChain network. Takes a minute, costs nothing.</p>
+        </div>
+        <div class="htb__step" style="--i:1">
+          <div class="htb__ghost">02</div>
+          <div class="htb__icon"><i></i></div>
+          <div class="htb__num">STEP 02</div>
+          <h3>GET PLS</h3>
+          <p>Bridge or buy <strong>PLS</strong> — it is both the gas and the pair. Keep a little spare for fees.</p>
+        </div>
+        <div class="htb__step" style="--i:2">
+          <div class="htb__ghost">03</div>
+          <div class="htb__icon"><i></i><i></i><i></i></div>
+          <div class="htb__num">STEP 03</div>
+          <h3>SWAP</h3>
+          <p>Hit <strong>BUY $WICK</strong> and pick your venue — our own aggregator, PulseX, or paste the contract anywhere.</p>
+        </div>
+      </div>
+      </div>
+      <p class="htb__foot rv" style="--i:3">Always check the contract before you swap:<br>
+        <code>0x8CDaf3d630Da9E1450832924D5701CC0500E9cfC</code></p>
+      <p class="rv" style="--i:4;text-align:center;margin-top:22px"><a class="btn" href="#" data-buy>BUY $WICK →</a></p>
     </div>
-    <p style="margin-top:28px"><a class="btn" href="https://swap.wick.pics">OPEN THE SWAP →</a></p>
   </div>
 </section>
 
-<!-- ── 6. THE CREW (their `team` slot) ──────────────────────────────────── -->
+<!-- ══ 6 · CREW (their team ring) ═════════════════════════════════════════ -->
 <section class="section section--crew" id="crew">
   <div class="crew__grid"></div>
-  <div class="wrap reveal" style="position:relative">
-    <div class="lbl">WHO IS BEHIND IT</div>
-    <h2>THE CREW.</h2>
-    <p class="lede">One human and a lot of agents. Green Wick builds and runs everything below —
-      trading bots, on-chain tools, and every site on this list. Mostly working. All shipped.</p>
-    <div class="crew__row">
-      <div class="crew__cell"><b>THE OPERATOR</b><span>Picks what gets built, and what gets killed.</span></div>
-      <div class="crew__cell"><b>THE AGENTS</b><span>Write, test, deploy and watch the estate. Around the clock.</span></div>
-      <div class="crew__cell"><b>THE FROG</b><span>Holds the grudge. Does not negotiate.</span></div>
-    </div>
+  <div class="crew__head">
+    <span class="lbl rv" style="--i:0">WHO IS BEHIND IT</span>
+    <h2 class="rv" style="--i:1">THE CREW.</h2>
+    <p class="lede rv" style="--i:2">One human and a lot of agents. Green Wick builds and runs every site on this list —
+      trading bots, on-chain tools, and the arcade. Mostly working. All shipped.</p>
+  </div>
+  <p class="crew__hint rv" style="--i:3">DRAG TO SPIN · CLICK A CARD</p>
+  <div class="crew__stage" id="crewStage" tabindex="0" role="group" aria-label="The crew — drag to spin the ring">
+    <div class="crew__ring" id="crewRing"></div>
   </div>
 </section>
 
-<!-- ── 7. BUILDS (their `creator` slot — the things we made that you can use) ─ -->
+<dialog id="crewDialog" aria-label="Crew member">
+  <div class="crewdlg">
+    <button class="crewdlg__close" id="crewClose" aria-label="Close">✕</button>
+    <img src="wick.png" alt="">
+    <b id="crewName">—</b>
+    <p id="crewRole">—</p>
+  </div>
+</dialog>
+
+<!-- ══ 7 · BUILDS (their creator panel) ═══════════════════════════════════ -->
 <section class="section section--builds" id="builds">
-  <div class="wrap reveal">
-    <div class="lbl">PROVE YOUR POWER</div>
-    <h2>WHAT WE'VE<br>SHIPPED.</h2>
-    <div class="grid grid--3">
-      <div class="card"><h3>THE ARCADE</h3><p>Pepe-as-John-Wick platformers, tower defence with your NFTs, wallet-signed leaderboards. Free.</p><a class="go" href="https://games.wick.pics">games.wick.pics →</a></div>
-      <div class="card"><h3>THE CHECKER</h3><p>Rug &amp; honeypot verdicts across five chains, with the evidence shown.</p><a class="go" href="https://onchain.wick.pics">onchain.wick.pics →</a></div>
-      <div class="card"><h3>THE SWAP</h3><p>Five aggregators, one best route, on any PulseChain token.</p><a class="go" href="https://swap.wick.pics">swap.wick.pics →</a></div>
-      <div class="card"><h3>FREE AI</h3><p>Every legit way to use serious AI for $0 — checked by hand and dated.</p><a class="go" href="https://freeai.wick.pics">freeai.wick.pics →</a></div>
-      <div class="card"><h3>GPU MARKET</h3><p>Ten providers, ~2,600 live GPU offers, one ranked tape.</p><a class="go" href="https://compute.wick.pics">compute.wick.pics →</a></div>
-      <div class="card"><h3>EVERYTHING ELSE</h3><p>Forty-odd sites and counting — the full estate.</p><a class="go" href="https://sites.wick.pics">sites.wick.pics →</a></div>
+  <div class="builds__grid"></div>
+  <div class="builds__glow"></div>
+  <div class="builds__inner">
+    <div class="builds__intro">
+      <span class="lbl rv" style="--i:0">PROVE YOUR POWER</span>
+      <h2 class="rv" style="--i:1">WHAT WE'VE<br>SHIPPED.</h2>
+      <p class="lede rv" style="--i:2">Forty-odd live sites, and every one of them is something you can open right now.
+        The console beside this is running through them.</p>
+      <ul class="builds__list rv" style="--i:3">
+        <li><a href="https://games.wick.pics">games.wick.pics</a></li>
+        <li><a href="https://onchain.wick.pics">onchain.wick.pics</a></li>
+        <li><a href="https://swap.wick.pics">swap.wick.pics</a></li>
+        <li><a href="https://freeai.wick.pics">freeai.wick.pics</a></li>
+        <li><a href="https://compute.wick.pics">compute.wick.pics</a></li>
+        <li><a href="https://sites.wick.pics">sites.wick.pics</a></li>
+      </ul>
     </div>
-  </div>
-</section>
-
-<!-- ── 8. ARCADE — drifting grid + scan line ────────────────────────────── -->
-<section class="section section--arcade" id="arcade">
-  <div class="arcade__art"></div><div class="arcade__scan"></div>
-  <div class="wrap reveal" style="position:relative">
-    <div class="lbl">THE ARCADE</div>
-    <h2>PLAY IT.</h2>
-    <p class="lede">Platformers, tower defence with your own NFTs, and wallet-signed leaderboards.
-      No install, no wallet needed to try, nothing to pay.</p>
-    <p style="margin-top:26px"><a class="btn" href="https://games.wick.pics">ENTER THE ARCADE →</a></p>
-  </div>
-</section>
-
-<!-- ── 9. ANTHEM ────────────────────────────────────────────────────────── -->
-<section class="section section--anthem" id="anthem">
-  <div class="wrap reveal">
-    <div class="lbl">THE SOUNDTRACK</div>
-    <h2>THE ANTHEM.</h2>
-    <div class="anthem__box">
-      <div class="eq"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-      <div style="flex:1;min-width:220px">
-        <p class="lede" style="font-size:14px">Every good grudge has a theme. This one is being written.</p>
+    <div class="builds__panel rv" style="--i:2">
+      <div class="builds__bar"><i></i><i></i><i></i><span>GREEN WICK // ESTATE</span></div>
+      <div class="builds__prompt">
+        <em>NOW SERVING</em>
+        <p id="buildsPrompt"></p>
       </div>
-      <span class="pending">NOT UPLOADED YET</span>
+      <div class="builds__console">
+        <div class="builds__slot">
+          <b id="buildsName">THE ARCADE</b>
+          <span id="buildsNote">games.wick.pics</span>
+        </div>
+      </div>
+      <div class="builds__foot">
+        <em>6 OF 40+ SHOWN</em>
+        <a class="btn btn--ghost" href="https://sites.wick.pics" style="padding:9px 14px">THE ESTATE →</a>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ── 10. ASCEND ────────────────────────────────────────────────────────── -->
+<!-- ══ 8 · ARCADE (their game invite) ═════════════════════════════════════ -->
+<section class="section section--arcade" id="arcade">
+  <div class="arcade__grid"></div>
+  <div class="arcade__glow"></div>
+  <div class="arcade__inner">
+    <div class="arcade__copy">
+      <span class="lbl rv" style="--i:0">THE ARCADE</span>
+      <h2 class="rv" style="--i:1">PLAY IT.</h2>
+      <p class="lede rv" style="--i:2">Platformers, tower defence with your own NFTs, and wallet-signed leaderboards.
+        No install, no wallet needed to try, nothing to pay.</p>
+      <p class="rv" style="--i:3;margin-top:26px"><a class="btn" href="https://games.wick.pics">ENTER THE ARCADE →</a></p>
+    </div>
+    <a class="arcade__frame rv" style="--i:3" href="https://games.wick.pics">
+      <span class="arcade__status"><i></i>CABINET ONLINE</span>
+      <img src="wick.png" alt="">
+      <strong>THE<br>ARCADE</strong>
+      <em>FREE TO PLAY · NO INSTALL</em>
+    </a>
+  </div>
+</section>
+
+<!-- ══ 9 · ANTHEM (their music list) ══════════════════════════════════════ -->
+<section class="section section--anthem" id="anthem">
+  <div class="anthem__inner">
+    <div class="anthem__head">
+      <span class="lbl rv" style="--i:0">THE SOUNDTRACK</span>
+      <h2 class="rv" style="--i:1">THE ANTHEM.</h2>
+      <p class="lede rv" style="--i:2">Every good grudge has a theme. This one is still being written —
+        when there is a track, it plays here.</p>
+    </div>
+    <ul class="anthem__list">
+      <li class="anthem__track rv" style="--i:3">
+        <span class="anthem__mark" aria-hidden="true">01</span>
+        <span class="anthem__meta"><b>THE WICK ANTHEM</b><span>NO AUDIO FILE SUPPLIED</span></span>
+        <span class="eq eq--idle" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+        <span class="pending">NOT UPLOADED YET</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- ══ 10 · ASCEND (their footer) ═════════════════════════════════════════ -->
 <section class="section section--ascend" id="ascend">
-  <div class="wrap reveal" style="text-align:center">
-    <div class="lbl">ASCEND</div>
-    <h2>LIGHT IT.</h2>
-    <p class="lede" style="margin:0 auto">Buy the ticker, play the games, break the tools and tell us.
+  <div class="ascend__inner">
+    <span class="lbl rv" style="--i:0">ASCEND</span>
+    <h2 class="rv" style="--i:1">LIGHT IT.</h2>
+    <p class="lede rv" style="--i:2;margin:0 auto">Buy the ticker, play the games, break the tools and tell us.
       The frog does not negotiate.</p>
-    <p style="margin-top:28px"><a class="btn" href="https://swap.wick.pics">BUY $WICK →</a></p>
-    <div class="foot__links">
+    <p class="rv" style="--i:3"><a class="btn" href="#" data-buy>BUY $WICK →</a></p>
+    <p class="rv" style="--i:4;font:500 11px/1.7 var(--mono);color:rgba(233,255,233,.36);word-break:break-all">
+      0x8CDaf3d630Da9E1450832924D5701CC0500E9cfC</p>
+    <div class="foot__links rv" style="--i:5">
       <a href="https://x.com/GreenWickAI">X</a>
       <a href="https://t.me/MrGreenWick">TELEGRAM</a>
       <a href="https://wick.pics">WICK.PICS</a>
       <a href="https://sites.wick.pics">THE ESTATE</a>
     </div>
-    <p class="fineprint">$WICK is a memecoin. It is not an investment, a promise, or a plan.
-      Do your own research — start with <a href="https://onchain.wick.pics" style="color:var(--wick)">our own checker</a>.</p>
+    <p class="fineprint rv" style="--i:6">$WICK is a memecoin. It is not an investment, a promise, or a plan.
+      Do your own research — start with <a href="https://onchain.wick.pics">our own checker</a>.
+      Not affiliated with John Wick, Lionsgate, or any film studio.</p>
   </div>
 </section>
 
+<!-- ── BUY MODAL (top level, so position:fixed is never trapped) ──────────── -->
+<div class="buy" id="buyModal" hidden role="dialog" aria-modal="true" aria-labelledby="buyTitle">
+  <div class="buy__panel" role="document">
+    <button class="buy__close" id="buyClose" aria-label="Close">✕</button>
+    <h3 id="buyTitle">BUY <span>$WICK</span></h3>
+    <p class="buy__sub">Pick where you swap. We are not choosing for you.</p>
+    <div class="buy__opts">
+      <a class="buy__opt" href="https://swap.wick.pics" target="_blank" rel="noopener noreferrer">
+        <i>W</i><b>WICK SWAP</b><span>Our aggregator — five routes, best price</span></a>
+      <a class="buy__opt" href="https://app.pulsex.com/?outputCurrency=0x8CDaf3d630Da9E1450832924D5701CC0500E9cfC" target="_blank" rel="noopener noreferrer">
+        <i>P</i><b>PULSEX</b><span>WICK / WPLS pair, direct</span></a>
+      <a class="buy__opt" href="https://dexscreener.com/pulsechain/0x32b9d861802eaeb90b141daa618074a9a38dcae6" target="_blank" rel="noopener noreferrer">
+        <i>C</i><b>THE CHART</b><span>Every live pair on DexScreener</span></a>
+      <button class="buy__opt" type="button" data-copy>
+        <i>⧉</i><b><span data-copy-label>COPY CONTRACT</span></b><span>Paste it into any PulseChain DEX</span></button>
+    </div>
+    <p class="buy__ca">CONTRACT
+      <code>0x8CDaf3d630Da9E1450832924D5701CC0500E9cfC</code>
+      Check it first at <a href="https://onchain.wick.pics" style="color:var(--wick)">onchain.wick.pics</a>.</p>
+    <p class="buy__note">Nothing here is financial advice.</p>
+  </div>
+</div>
+
 <script>
 (function(){
-  'use strict';
-  var CA='0x8CDaf3d630Da9E1450832924D5701CC0500E9cfC';
+'use strict';
+var CA='0x8CDaf3d630Da9E1450832924D5701CC0500E9cfC';
+var REDUCE=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var $=function(s,r){return (r||document).querySelector(s);};
+var $$=function(s,r){return [].slice.call((r||document).querySelectorAll(s));};
 
-  /* ── THE CHROME MEASURES ITSELF ──────────────────────────────────────
-     The disclaimer wraps to 2-3 lines on a phone. Pinning the nav to a
-     hardcoded 26px put it on top of the brand (caught by rasterising at
-     390px — no console error, no overflow, just broken). Measure instead. */
-  function chrome(){
-    var d=document.querySelector('.disc'); if(!d) return;
-    document.documentElement.style.setProperty('--navh', Math.ceil(d.getBoundingClientRect().height)+'px');
+/* ── THE CHROME MEASURES ITSELF ────────────────────────────────────────────
+   The disclaimer wraps. Pinning the nav to a hardcoded 26px put it on top of
+   the brand at 390px — no console error, no overflow, just broken. Measure. */
+function chrome(){
+  var d=$('.disc'); if(!d) return;
+  document.documentElement.style.setProperty('--navh',Math.ceil(d.getBoundingClientRect().height)+'px');
+}
+chrome(); window.addEventListener('resize',chrome); window.addEventListener('load',chrome);
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(chrome);
+
+/* ── COPY-TO-CLIPBOARD (one helper, reused everywhere) ─────────────────── */
+function copyCA(btn){
+  var lbl=btn?$('[data-copy-label]',btn):null, was=lbl?lbl.textContent:'';
+  var done=function(){ if(!lbl)return; lbl.textContent='COPIED ✓';
+    setTimeout(function(){ lbl.textContent=was; },1600); };
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(CA).then(done,done); }
+  else { var t=document.createElement('textarea'); t.value=CA; t.setAttribute('readonly','');
+         t.style.position='fixed'; t.style.opacity='0'; document.body.appendChild(t); t.select();
+         try{document.execCommand('copy');}catch(e){} document.body.removeChild(t); done(); }
+}
+$$('[data-copy]').forEach(function(b){ b.addEventListener('click',function(e){ e.preventDefault(); copyCA(b); }); });
+
+/* ── BUY MODAL — real focus handling, Escape, backdrop, focus returned ──── */
+var modal=$('#buyModal'), lastFocus=null;
+var FOCUSABLE='a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])';
+function openBuy(e){
+  if(e) e.preventDefault();
+  if(!modal||!modal.hidden) return;
+  lastFocus=document.activeElement;
+  modal.hidden=false;
+  document.body.style.overflow='hidden';
+  var f=$$(FOCUSABLE,modal); if(f.length) f[0].focus();
+}
+function closeBuy(){
+  if(!modal||modal.hidden) return;
+  modal.hidden=true;
+  document.body.style.overflow='';
+  if(lastFocus&&lastFocus.focus) lastFocus.focus();
+  lastFocus=null;
+}
+$$('[data-buy]').forEach(function(b){ b.addEventListener('click',openBuy); });
+if(modal){
+  $('#buyClose').addEventListener('click',closeBuy);
+  modal.addEventListener('click',function(e){ if(e.target===modal) closeBuy(); });
+  modal.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){ e.preventDefault(); closeBuy(); return; }
+    if(e.key!=='Tab') return;
+    var f=$$(FOCUSABLE,modal); if(!f.length) return;
+    var first=f[0], last=f[f.length-1];
+    if(e.shiftKey&&document.activeElement===first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey&&document.activeElement===last){ e.preventDefault(); first.focus(); }
+  });
+  /* every buy option closes the sheet behind it — nothing is trapped */
+  $$('.buy__opt[href]',modal).forEach(function(a){ a.addEventListener('click',function(){ setTimeout(closeBuy,80); }); });
+}
+
+/* ── ENTRY GATE ──────────────────────────────────────────────────────────── */
+var gate=$('#gate'), bootEl=$('#boot'), booted=false;
+var BOOT=['> mounting wick.pics/v2','> loading estate manifest','> arming the frog','> ready'];
+if(bootEl&&!REDUCE){
+  BOOT.forEach(function(l,i){ setTimeout(function(){
+    if(bootEl) bootEl.innerHTML+=(i?'<br>':'')+l; },260*i+180); });
+} else if(bootEl){ bootEl.innerHTML=BOOT.join('<br>'); }
+function light(){
+  if(booted) return; booted=true;
+  document.body.classList.add('lit');
+  setTimeout(function(){ $$('.hero__linewrap').forEach(function(w){ w.classList.add('open'); }); },1500);
+  if(gate){ gate.classList.add('gone');
+    setTimeout(function(){ if(gate&&gate.parentNode) gate.parentNode.removeChild(gate); },900); }
+  ['dialCa','dialAnthem','scrollHint'].forEach(function(id,i){
+    var el=document.getElementById(id);
+    if(el) setTimeout(function(){ el.classList.add('in'); },160*i+240);
+  });
+}
+if(gate) gate.addEventListener('click',light);
+window.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' ') light(); });
+setTimeout(light,6000);            /* never trap a reader behind the gate */
+
+/* ── CA DIAL — the trigger expands a panel, it does not pick a venue ────── */
+var dialCa=$('#dialCa'), caKnob=$('#caKnob');
+if(caKnob&&dialCa){
+  caKnob.addEventListener('click',function(){
+    var open=dialCa.classList.toggle('is-open');
+    caKnob.setAttribute('aria-expanded',open?'true':'false');
+  });
+  document.addEventListener('click',function(e){
+    if(!dialCa.contains(e.target)){ dialCa.classList.remove('is-open'); caKnob.setAttribute('aria-expanded','false'); }
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){ dialCa.classList.remove('is-open'); caKnob.setAttribute('aria-expanded','false'); }
+  });
+}
+
+/* ── .is-live — ambient motion is gated to the section you are looking at.
+     Added AND removed, so nothing animates off-screen.                    */
+var sections=$$('.section');
+if('IntersectionObserver' in window){
+  var live=new IntersectionObserver(function(rows){
+    rows.forEach(function(r){ r.target.classList.toggle('is-live',r.isIntersecting); });
+  },{rootMargin:'-10% 0px -10% 0px'});
+  sections.forEach(function(s){ live.observe(s); });
+  /* the entrance pass latches: once seen, it stays revealed */
+  var rvo=new IntersectionObserver(function(rows){
+    rows.forEach(function(r){ if(r.isIntersecting){ r.target.classList.add('in'); rvo.unobserve(r.target); } });
+  },{rootMargin:'0px 0px -8% 0px'});
+  $$('.rv').forEach(function(el){ rvo.observe(el); });
+} else {
+  sections.forEach(function(s){ s.classList.add('is-live'); });
+  $$('.rv').forEach(function(el){ el.classList.add('in'); });
+}
+
+/* ── SCROLL HINT — hides over the last section, clicks to the next one ──── */
+var hint=$('#scrollHint');
+if(hint){
+  hint.addEventListener('click',function(){
+    var y=window.scrollY,next=null;
+    for(var i=0;i<sections.length;i++){
+      if(sections[i].offsetTop>y+8){ next=sections[i]; break; }
+    }
+    (next||sections[sections.length-1]).scrollIntoView({behavior:REDUCE?'auto':'smooth'});
+  });
+  var last=$('#ascend');
+  if(last&&'IntersectionObserver' in window){
+    new IntersectionObserver(function(rows){
+      hint.classList.toggle('is-hidden',rows[0].isIntersecting);
+    },{threshold:0}).observe(last);
   }
-  chrome();
-  window.addEventListener('resize',chrome);
-  window.addEventListener('load',chrome);
+}
 
-  /* ── GATE ───────────────────────────────────────────────────────────── */
-  var gate=document.getElementById('gate');
-  function open(){
-    if(!gate||gate.classList.contains('gone'))return;
-    gate.classList.add('gone');
-    setTimeout(function(){ if(gate&&gate.parentNode) gate.parentNode.removeChild(gate); },900);
-    ['railCa','railAnthem','scrollHint'].forEach(function(id){
-      var el=document.getElementById(id); if(el) el.classList.add('in');
+/* ── INFLECTION — split the line into words for a centre-out stagger ────── */
+var infl=$('#inflectionTitle');
+if(infl&&!infl.dataset.split){
+  var words=infl.textContent.trim().split(/\s+/);
+  var mid=(words.length-1)/2;
+  infl.innerHTML=words.map(function(w,i){
+    return '<span class="inflection__word" style="--w:'+Math.abs(i-mid).toFixed(2)+'">'+w+'</span>';
+  }).join(' ');
+  infl.dataset.split='1';
+}
+
+/* ── ORBS — click bursts a shockwave ───────────────────────────────────── */
+$$('.orb').forEach(function(o){
+  function burst(){
+    if(REDUCE) return;
+    o.classList.remove('burst'); void o.offsetWidth; o.classList.add('burst');
+    setTimeout(function(){ o.classList.remove('burst'); },700);
+  }
+  o.addEventListener('click',burst);
+  o.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); burst(); } });
+});
+
+/* ── CREW — a real 3D ring: cards on a circle, dragged, auto-spinning ───── */
+(function(){
+  var stage=$('#crewStage'), ring=$('#crewRing'), dlg=$('#crewDialog');
+  if(!stage||!ring) return;
+  var CREW=[
+    {n:'THE OPERATOR', r:'Picks what gets built, and what gets killed.'},
+    {n:'THE AGENTS',   r:'Write, test, deploy and watch the estate. Around the clock.'},
+    {n:'THE FROG',     r:'Holds the grudge. Does not negotiate.'},
+    {n:'SLOT 04', r:'', slot:true},{n:'SLOT 05', r:'', slot:true},
+    {n:'SLOT 06', r:'', slot:true},{n:'SLOT 07', r:'', slot:true},{n:'SLOT 08', r:'', slot:true}
+  ];
+  var STEP=360/CREW.length, TILT=15, cards=[];
+  CREW.forEach(function(m,i){
+    var c=document.createElement('div');
+    c.className='crew__card'+(m.slot?' is-slot':'');
+    c.setAttribute('role','button'); c.setAttribute('tabindex','0');
+    c.setAttribute('aria-label',m.n+(m.r?' — '+m.r:''));
+    c.innerHTML='<div class="crew__face">'+
+        (m.slot?'<span class="crew__tag">OPEN SLOT</span>':'')+
+        '<span class="crew__expand" aria-hidden="true">+</span>'+
+        '<b></b><em></em></div>'+
+      '<div class="crew__back"><img src="wick.png" alt=""><span>$WICK</span></div>';
+    $('b',c).textContent=m.n;
+    $('em',c).textContent=m.slot?'Reserved.':m.r;
+    c.addEventListener('click',function(){
+      if(!dlg||!dlg.showModal) return;
+      $('#crewName').textContent=m.n;
+      $('#crewRole').textContent=m.slot?'This seat is open.':m.r;
+      dlg.showModal();
+    });
+    c.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); c.click(); } });
+    ring.appendChild(c); cards.push(c);
+  });
+  var close=$('#crewClose');
+  if(close&&dlg) close.addEventListener('click',function(){ dlg.close(); });
+  if(dlg) dlg.addEventListener('click',function(e){ if(e.target===dlg) dlg.close(); });
+
+  var radius=480, angle=0, vel=0, drag=false, px=0, raf=0, idle=0;
+  function layout(){
+    var w=cards[0].offsetWidth||200;
+    radius=Math.round(w*1.86);
+    cards.forEach(function(c,i){ c.style.transform='rotateY('+(i*STEP)+'deg) translateZ('+radius+'px)'; });
+  }
+  function norm(a){ a%=360; if(a>180)a-=360; if(a<-180)a+=360; return a; }
+  function paint(){
+    ring.style.transform='translate(-50%,-50%) rotateX('+TILT+'deg) rotateY('+angle+'deg)';
+    cards.forEach(function(c,i){
+      var a=norm(i*STEP+angle), k=Math.cos(a*Math.PI/180);
+      c.style.zIndex=String(Math.round(200+k*100));
+      c.style.opacity=(0.46+0.54*((k+1)/2)).toFixed(3);
+      c.style.filter='brightness('+(0.72+0.28*((k+1)/2)).toFixed(3)+')';
+      c.classList.toggle('is-far',k<0);
+      c.classList.toggle('is-active',Math.abs(a)<STEP/2);
     });
   }
-  if(gate){ gate.addEventListener('click',open); }
-  window.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' ')open(); });
-  setTimeout(open,6000);   /* never trap a reader behind the gate */
-
-  /* ── COPY CA ────────────────────────────────────────────────────────── */
-  var btn=document.getElementById('copyCa');
-  if(btn) btn.addEventListener('click',function(){
-    var done=function(){ btn.textContent='COPIED ✓'; setTimeout(function(){ btn.textContent='0x8CDa…9cfC ⧉'; },1600); };
-    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(CA).then(done,done); }
-    else { var t=document.createElement('textarea'); t.value=CA; document.body.appendChild(t); t.select();
-           try{document.execCommand('copy');}catch(e){} document.body.removeChild(t); done(); }
+  function tick(){
+    if(!drag){
+      idle++;
+      if(idle>40) vel+=(0.16-vel)*0.02;      /* settle back into a slow drift */
+      angle+=vel; vel*=0.965;
+      if(Math.abs(vel)<0.16&&idle>40) vel=0.16;
+    }
+    paint();
+    raf=requestAnimationFrame(tick);
+  }
+  function down(x){ drag=true; px=x; vel=0; idle=0; stage.classList.add('is-dragging'); }
+  function move(x){ if(!drag) return; var d=x-px; px=x; angle+=d*0.35; vel=d*0.35; paint(); }
+  function up(){ drag=false; idle=0; stage.classList.remove('is-dragging'); }
+  stage.addEventListener('pointerdown',function(e){ down(e.clientX); stage.setPointerCapture&&stage.setPointerCapture(e.pointerId); });
+  stage.addEventListener('pointermove',function(e){ move(e.clientX); });
+  stage.addEventListener('pointerup',up); stage.addEventListener('pointercancel',up);
+  stage.addEventListener('lostpointercapture',up);
+  stage.addEventListener('keydown',function(e){
+    if(e.key==='ArrowLeft'){ e.preventDefault(); angle+=STEP; idle=0; paint(); }
+    if(e.key==='ArrowRight'){ e.preventDefault(); angle-=STEP; idle=0; paint(); }
   });
+  layout(); paint();
+  window.addEventListener('resize',function(){ layout(); paint(); });
+  if(!REDUCE){
+    if('IntersectionObserver' in window){
+      new IntersectionObserver(function(rows){
+        if(rows[0].isIntersecting){ if(!raf) raf=requestAnimationFrame(tick); }
+        else if(raf){ cancelAnimationFrame(raf); raf=0; }
+      },{threshold:0}).observe(stage);
+    } else { raf=requestAnimationFrame(tick); }
+  }
+})();
 
-  /* ── REVEAL ─────────────────────────────────────────────────────────── */
-  var els=[].slice.call(document.querySelectorAll('.reveal'));
+/* ── BUILDS CONSOLE — genuinely cycles the estate, with a typed prompt ──── */
+(function(){
+  var nameEl=$('#buildsName'), noteEl=$('#buildsNote'), promptEl=$('#buildsPrompt');
+  if(!nameEl||!noteEl||!promptEl) return;
+  var ITEMS=[
+    ['THE ARCADE','games.wick.pics','platformers, tower defence, signed leaderboards'],
+    ['THE CHECKER','onchain.wick.pics','rug &amp; honeypot verdicts, evidence shown'],
+    ['THE SWAP','swap.wick.pics','five aggregators, one best route'],
+    ['FREE AI','freeai.wick.pics','every legit way to use serious AI for $0'],
+    ['GPU MARKET','compute.wick.pics','ten providers, one ranked tape'],
+    ['THE ESTATE','sites.wick.pics','forty-odd sites and counting']
+  ];
+  var i=0,timer=0,typer=0,visible=false;
+  function type(text,done){
+    clearInterval(typer); promptEl.textContent=''; var k=0;
+    if(REDUCE){ promptEl.textContent=text; if(done)done(); return; }
+    typer=setInterval(function(){
+      k++; promptEl.textContent=text.slice(0,k);
+      if(k>=text.length){ clearInterval(typer); if(done)done(); }
+    },26);
+  }
+  function show(){
+    var it=ITEMS[i%ITEMS.length]; i++;
+    nameEl.textContent=it[0]; noteEl.textContent=it[1];
+    type(it[2].replace(/&amp;/g,'&'));
+  }
+  function start(){ if(timer||visible===false) return; timer=setInterval(show,4200); }
+  function stop(){ clearInterval(timer); timer=0; clearInterval(typer); }
+  show();
   if('IntersectionObserver' in window){
-    var io=new IntersectionObserver(function(rows){
-      rows.forEach(function(r){ if(r.isIntersecting){ r.target.classList.add('in'); io.unobserve(r.target); } });
-    },{rootMargin:'0px 0px -12% 0px'});
-    els.forEach(function(el){ io.observe(el); });
-  } else { els.forEach(function(el){ el.classList.add('in'); }); }
+    new IntersectionObserver(function(rows){
+      visible=rows[0].isIntersecting;
+      if(visible&&!REDUCE){ start(); } else { stop(); }
+    },{threshold:0}).observe($('#builds'));
+  } else if(!REDUCE){ visible=true; start(); }
+})();
 
-  /* ── THE FIXED PANE — embers rising behind every section ────────────────
-     Deliberately cheap: ~70 particles, one rAF, pauses when the tab is hidden
-     and when the reader asks for reduced motion.                          */
-  var c=document.getElementById('wick-canvas'); if(!c) return;
-  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* ── THE FIXED PANE — embers rising behind every section ──────────────────
+   Deliberately cheap: ~70 particles, one rAF, pauses when the tab is hidden
+   and when the reader asks for reduced motion.                          */
+function embers(canvas,opts){
+  var c=document.getElementById(canvas); if(!c) return;
   var ctx=c.getContext&&c.getContext('2d'); if(!ctx) return;
-  var W=0,H=0,dpr=Math.min(window.devicePixelRatio||1,2),P=[],raf=0;
+  opts=opts||{};
+  var W=0,H=0,dpr=Math.min(window.devicePixelRatio||1,2),P=[],raf=0,vis=true;
   function size(){
-    W=window.innerWidth; H=window.innerHeight;
+    var box=opts.fill?c.getBoundingClientRect():{width:window.innerWidth,height:window.innerHeight};
+    W=Math.max(1,Math.round(box.width)); H=Math.max(1,Math.round(box.height));
     c.width=Math.floor(W*dpr); c.height=Math.floor(H*dpr);
     c.style.width=W+'px'; c.style.height=H+'px';
     ctx.setTransform(dpr,0,0,dpr,0,0);
   }
   function seed(){
-    P=[]; var n=Math.max(28,Math.min(70,Math.round(W/22)));
+    P=[]; var n=Math.max(20,Math.min(opts.max||70,Math.round(W/(opts.density||22))));
     for(var i=0;i<n;i++) P.push({
       x:Math.random()*W, y:Math.random()*H,
       r:Math.random()*1.7+.5, v:Math.random()*.28+.06,
@@ -501,13 +1307,21 @@ nav .cta:hover{background:rgba(0,255,65,.1)}
     }
     raf=requestAnimationFrame(frame);
   }
-  function start(){ if(!raf&&!reduce) raf=requestAnimationFrame(frame); }
+  function start(){ if(!raf&&!REDUCE&&vis) raf=requestAnimationFrame(frame); }
   function stop(){ if(raf){ cancelAnimationFrame(raf); raf=0; } }
   size(); seed();
-  if(reduce){ frame(); stop(); } else { start(); }
+  if(REDUCE){ frame(); stop(); } else { start(); }
   var t=0;
   window.addEventListener('resize',function(){ clearTimeout(t); t=setTimeout(function(){ size(); seed(); },180); });
-  document.addEventListener('visibilitychange',function(){ document.hidden?stop():start(); });
+  document.addEventListener('visibilitychange',function(){ if(document.hidden){stop();} else {start();} });
+  if(opts.fill&&'IntersectionObserver' in window){
+    new IntersectionObserver(function(rows){
+      vis=rows[0].isIntersecting; if(vis){ size(); start(); } else { stop(); }
+    },{threshold:0}).observe(c);
+  }
+}
+embers('wick-canvas',{});
+embers('origin-particles',{fill:true,max:44,density:14});
 })();
 </script>
 </body>
