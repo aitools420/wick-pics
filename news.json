@@ -1,10 +1,20 @@
 [
  {
+  "date": "2026-08-31",
+  "line": "Every WICK LP drawn on one price picture",
+  "links": [
+   {
+    "label": "See LPs",
+    "url": "https://lp.wick.pics/"
+   }
+  ]
+ },
+ {
   "date": "2026-08-30",
   "line": "CTOable pump tickers with PAID DexScreeners",
   "links": [
    {
-    "label": "gems.wick.pics",
+    "label": "GEMS",
     "url": "https://gems.wick.pics/"
    }
   ]
@@ -153,7 +163,7 @@
  },
  {
   "date": "2026-07-30",
-  "line": "KJP: The Black File — new game, live.",
+  "line": "KJP: The Black File \u2014 new game, live.",
   "links": [
    {
     "label": "Play",
@@ -163,7 +173,7 @@
  },
  {
   "date": "2026-07-30",
-  "line": "PEPE WICK: Arcade Alley — live.",
+  "line": "PEPE WICK: Arcade Alley \u2014 live.",
   "links": [
    {
     "label": "Play",
@@ -273,7 +283,7 @@
  },
  {
   "date": "2026-03-31",
-  "line": "Tap a crypto cliché to shill it.",
+  "line": "Tap a crypto clich\u00e9 to shill it.",
   "links": [
    {
     "label": "Shill",
@@ -312,7 +322,7 @@
   ]
  },
  {
-  "_comment": "PLACEHOLDER — future rh.wick.pics entry. Owner to supply date, line, and links. Items with \"placeholder\": true are NOT rendered on the site.",
+  "_comment": "PLACEHOLDER \u2014 future rh.wick.pics entry. Owner to supply date, line, and links. Items with \"placeholder\": true are NOT rendered on the site.",
   "placeholder": true,
   "date": "",
   "line": "",
