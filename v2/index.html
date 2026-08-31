@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>$WICK — Never Kill A Frog's Dog</title>
+<meta name="description" content="$WICK on PulseChain. A frog with a gun and a grudge — and an AI company that ships. Awaken the wick.">
+<meta property="og:title" content="$WICK — Never Kill A Frog's Dog">
+<meta property="og:description" content="$WICK on PulseChain. A frog with a gun and a grudge — and an AI company that ships.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://wick.pics/v2/">
+<meta property="og:image" content="https://wick.pics/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* $WICK v2 — the supersaiyan.co STRUCTURE (gate → hero → origin → tokenomics → how to buy →
+     team → game → soundtrack → ascend), rebuilt in WICK's own identity. Their art, copy and code
+     are theirs; this is the section flow and interaction pattern only. */
+  :root{
+    --bg:#050705; --ink:#e9ffe9; --dim:#7fa17f; --line:#16301a;
+    --wick:#00ff41;          /* WICK green, the one shouting colour */
+    --gold:#ffb02e;          /* the second accent — muzzle flash */
+    --disp:'Bebas Neue',Impact,sans-serif; --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font:400 16px/1.6 var(--mono);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+  .lbl{font:500 11px/1.4 var(--mono);letter-spacing:.28em;text-transform:uppercase;color:var(--wick)}
+
+  /* ── GATE (their "TAP TO AWAKEN" entry) ───────────────────────────────── */
+  #gate{position:fixed;inset:0;z-index:90;background:var(--bg);display:grid;place-items:center;cursor:pointer;transition:opacity .7s ease}
+  #gate.gone{opacity:0;pointer-events:none}
+  #gate .tick{position:absolute;top:18px;left:22px;font:500 11px/1 var(--mono);letter-spacing:.3em;color:var(--wick);opacity:.75}
+  #gatemark{width:min(58vw,420px);filter:drop-shadow(0 0 42px rgba(0,255,65,.42))}
+  #gate .tap{position:absolute;bottom:14vh;font:500 12px/1 var(--mono);letter-spacing:.5em;color:var(--wick);animation:pulse 1.9s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
+  #bolt{position:absolute;width:min(70vw,520px);height:min(70vw,520px);border-radius:50%;
+    background:radial-gradient(circle,rgba(0,255,65,.20),transparent 62%);animation:breathe 3.4s ease-in-out infinite}
+  @keyframes breathe{0%,100%{transform:scale(.92)}50%{transform:scale(1.06)}}
+
+  /* ── NAV ───────────────────────────────────────────────────────────────── */
+  header{position:fixed;top:0;left:0;right:0;z-index:60;backdrop-filter:blur(9px);background:rgba(5,7,5,.82);border-bottom:1px solid var(--line)}
+  .disc{font:500 10px/1.5 var(--mono);letter-spacing:.06em;color:var(--dim);text-align:center;padding:6px 12px;border-bottom:1px solid var(--line)}
+  .bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0}
+  .brand{display:flex;align-items:center;gap:10px;font:400 26px/1 var(--disp);letter-spacing:.06em;color:var(--wick)}
+  .brand img{width:30px;height:30px;border-radius:50%;border:1px solid var(--wick)}
+  nav ul{display:flex;gap:20px;list-style:none;font:500 11px/1 var(--mono);letter-spacing:.2em}
+  nav a:hover{color:var(--wick)}
+  nav .cta{border:1px solid var(--wick);color:var(--wick);padding:8px 12px;border-radius:3px}
+  /* phone: the nav wraps rather than pushing the page sideways (measured overflow, 390px) */
+  @media(max-width:860px){
+    .bar{flex-wrap:wrap;justify-content:center;gap:8px}
+    nav{width:100%}
+    nav ul{flex-wrap:wrap;justify-content:center;gap:8px 12px;font-size:9.5px;letter-spacing:.1em}
+    .brand{font-size:20px}
+  }
+
+  /* ── HERO ──────────────────────────────────────────────────────────────── */
+  #hero{position:relative;min-height:100svh;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:20px;padding-top:96px}
+  #hero .kick{margin-bottom:14px}
+  #hero h1{font:400 clamp(64px,12vw,150px)/.86 var(--disp);letter-spacing:.02em;
+    background:linear-gradient(180deg,#fff,#9fe8a8 42%,#2f7a3d);-webkit-background-clip:text;background-clip:text;color:transparent}
+  #hero .art{position:relative;display:grid;place-items:center;min-height:52svh}
+  #hero .art img{width:min(88%,460px);filter:drop-shadow(0 0 60px rgba(0,255,65,.35))}
+  #heroglow{position:absolute;width:78%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(0,255,65,.22),transparent 65%);animation:breathe 4.6s ease-in-out infinite}
+  @media(max-width:860px){#hero{grid-template-columns:1fr;text-align:center;padding-top:120px}#hero .art{order:-1}}
+
+  /* CA bar + sound toggle (their two floating hero controls) */
+  .float{position:fixed;bottom:22px;z-index:55;font:500 11px/1 var(--mono);letter-spacing:.16em}
+  #cabtn{left:22px}
+  #sound{right:22px}
+  .float button{background:rgba(5,7,5,.85);border:1px solid var(--wick);color:var(--wick);border-radius:999px;
+    padding:14px 16px;cursor:pointer;font:inherit;letter-spacing:inherit}
+  .float button:hover{background:var(--wick);color:#04130c}
+  #capanel{position:fixed;bottom:74px;left:22px;z-index:55;max-width:min(92vw,430px);padding:12px 14px;
+    background:rgba(5,7,5,.95);border:1px solid var(--wick);border-radius:6px;display:none}
+  #capanel.on{display:block}
+  #capanel code{font-size:11px;color:var(--ink);word-break:break-all}
+  #capanel button{margin-top:8px;background:var(--wick);color:#04130c;border:0;border-radius:3px;padding:7px 11px;cursor:pointer;font:700 10px/1 var(--mono);letter-spacing:.14em}
+
+  /* ── SECTIONS ──────────────────────────────────────────────────────────── */
+  section.blk{padding:96px 0;border-top:1px solid var(--line)}
+  h2{font:400 clamp(36px,7vw,86px)/.92 var(--disp);letter-spacing:.02em;margin-bottom:8px}
+  h2 i{font-style:normal;color:var(--wick)}
+  .lead{max-width:56ch;color:var(--dim);margin-top:16px;font-size:15.5px}
+  .lead b{color:var(--ink);font-weight:500}
+  #ca-inline{word-break:break-all}   /* a 42-char address must never widen the page */
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:34px}
+  .stat{border:1px solid var(--line);border-radius:6px;padding:18px 16px;background:#080d08}
+  .stat .n{font:400 34px/1 var(--disp);color:var(--wick)}
+  .stat .k{font:500 10px/1.4 var(--mono);letter-spacing:.18em;color:var(--dim);text-transform:uppercase;margin-top:6px}
+  @media(max-width:860px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:34px;counter-reset:s}
+  .step{border:1px solid var(--line);border-radius:6px;padding:22px 18px;background:#080d08;position:relative}
+  .step::before{counter-increment:s;content:"0" counter(s);position:absolute;top:14px;right:16px;font:400 30px/1 var(--disp);color:#16301a}
+  .step h3{font:400 26px/1 var(--disp);letter-spacing:.04em;color:var(--wick);margin-bottom:8px}
+  .step p{font-size:14px;color:var(--dim)}
+  @media(max-width:860px){.steps{grid-template-columns:1fr}}
+
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:34px}
+  .card{border:1px solid var(--line);border-radius:6px;padding:20px 18px;background:#080d08}
+  .card b{display:block;font:400 24px/1.1 var(--disp);letter-spacing:.04em;color:var(--ink);margin-bottom:6px}
+  .card span{font-size:13.5px;color:var(--dim)}
+  .card a{color:var(--wick)}
+  @media(max-width:860px){.grid3{grid-template-columns:1fr}}
+
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:center;margin-top:24px}
+  .split img{width:100%;border:1px solid var(--line);border-radius:8px}
+  @media(max-width:860px){.split{grid-template-columns:1fr}}
+
+  .buybtn{display:inline-block;margin-top:26px;background:var(--wick);color:#04130c;font:700 12px/1 var(--mono);
+    letter-spacing:.2em;padding:18px 26px;border-radius:4px}
+  .buybtn:hover{background:var(--gold)}
+
+  footer{padding:52px 0 72px;border-top:1px solid var(--line);text-align:center;color:var(--dim);font-size:12px}
+  footer a{color:var(--wick)}
+  .socials{display:flex;gap:14px;justify-content:center;margin-top:14px;font:500 11px/1 var(--mono);letter-spacing:.2em}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- GATE -->
+<div id="gate">
+  <span class="tick">$WICK // SYS_INIT_v2.0</span>
+  <div id="bolt"></div>
+  <img id="gatemark" src="wick.png" alt="">
+  <span class="tap">TAP TO LIGHT THE WICK</span>
+</div>
+
+<header>
+  <div class="disc">Not affiliated with John Wick, Lionsgate, or any film studio — original, community-driven art &amp; concepts. Nothing here is financial advice.</div>
+  <div class="wrap bar">
+    <a class="brand" href="#hero"><img src="wick.png" alt="">$WICK</a>
+    <nav><ul>
+      <li><a href="#hero">HOME</a></li>
+      <li><a href="#origin">ORIGIN</a></li>
+      <li><a href="#tokenomics">TOKENOMICS</a></li>
+      <li><a href="#buy">HOW TO BUY</a></li>
+      <li><a href="#builds">BUILDS</a></li>
+      <li><a class="cta" href="https://games.wick.pics">PLAY</a></li>
+    </ul></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="hero">
+    <div>
+      <div class="kick lbl">NEVER KILL A FROG'S DOG</div>
+      <h1>LIGHT<br>THE WICK</h1>
+      <p class="lead">A frog with a gun and a grudge — and behind him, an AI company that actually ships.
+        <b>$WICK</b> on PulseChain: games, tools and live products, built in the open.</p>
+      <a class="buybtn" href="https://swap.wick.pics">BUY $WICK →</a>
+    </div>
+    <div class="art"><div id="heroglow"></div><img src="wick.png" alt="Green Wick"></div>
+  </section>
+
+  <section class="blk" id="origin">
+    <div class="lbl">ORIGIN STORY</div>
+    <h2>THEY TOOK<br>HIS <i>DOG.</i></h2>
+    <p class="lead">Every good story starts with a debt someone has to settle. Ours starts with a frog, a stolen dog,
+      and a very large amount of patience running out.</p>
+    <p class="lead">$WICK is the ticker for that grudge — and the front door to everything Green Wick builds:
+      autonomous agents, on-chain tools, and games you can actually play. <b>Mostly working. All shipped.</b></p>
+  </section>
+
+  <section class="blk" id="tokenomics">
+    <div class="lbl">POWER LEVEL</div>
+    <h2>TOKEN<i>OMICS.</i></h2>
+    <div class="stats">
+      <div class="stat"><div class="n">11.1M</div><div class="k">total supply</div></div>
+      <div class="stat"><div class="n">0%</div><div class="k">buy / sell tax</div></div>
+      <div class="stat"><div class="n">LP</div><div class="k">locked &amp; burned</div></div>
+      <div class="stat"><div class="n">PLS</div><div class="k">PulseChain</div></div>
+    </div>
+    <p class="lead">Contract: <b id="ca-inline">0x8CDaf3d630Da9E1450832924D5701CC0500E9cfC</b> —
+      verify it yourself at <a href="https://onchain.wick.pics" style="color:var(--wick)">onchain.wick.pics</a>,
+      our own rug &amp; honeypot checker.</p>
+  </section>
+
+  <section class="blk" id="buy">
+    <div class="lbl">HOW TO BUY</div>
+    <h2>THREE <i>STEPS.</i></h2>
+    <div class="steps">
+      <div class="step"><h3>WALLET</h3><p>Install MetaMask or Rabby and add the PulseChain network. Takes a minute, costs nothing.</p></div>
+      <div class="step"><h3>GET PLS</h3><p>Bridge or buy PLS — it's the gas and the pair. Keep a little spare for fees.</p></div>
+      <div class="step"><h3>SWAP</h3><p>Use our own aggregator at swap.wick.pics: it checks five routes and takes the best one.</p></div>
+    </div>
+    <a class="buybtn" href="https://swap.wick.pics">OPEN THE SWAP →</a>
+  </section>
+
+  <section class="blk" id="builds">
+    <div class="lbl">PROVE YOUR POWER</div>
+    <h2>WHAT WE'VE <i>SHIPPED.</i></h2>
+    <div class="grid3">
+      <div class="card"><b>THE ARCADE</b><span>Pepe-as-John-Wick platformers, tower defence with your NFTs, wallet-signed leaderboards. Free.
+        <a href="https://games.wick.pics">games.wick.pics →</a></span></div>
+      <div class="card"><b>THE CHECKER</b><span>Rug &amp; honeypot verdicts across five chains, with the evidence shown.
+        <a href="https://onchain.wick.pics">onchain.wick.pics →</a></span></div>
+      <div class="card"><b>THE SWAP</b><span>Five aggregators, one best route, on any PulseChain token.
+        <a href="https://swap.wick.pics">swap.wick.pics →</a></span></div>
+      <div class="card"><b>FREE AI</b><span>Every legit way to use serious AI for $0 — checked by hand and dated.
+        <a href="https://freeai.wick.pics">freeai.wick.pics →</a></span></div>
+      <div class="card"><b>GPU MARKET</b><span>Ten providers, ~2,600 live GPU offers, one ranked tape.
+        <a href="https://compute.wick.pics">compute.wick.pics →</a></span></div>
+      <div class="card"><b>EVERYTHING ELSE</b><span>Forty-odd sites and counting — the full estate.
+        <a href="https://sites.wick.pics">sites.wick.pics →</a></span></div>
+    </div>
+  </section>
+
+  <section class="blk" id="ascend">
+    <div class="lbl">ASCEND</div>
+    <h2>LIGHT IT.</h2>
+    <p class="lead">Buy the ticker, play the games, break the tools and tell us. The frog does not negotiate.</p>
+    <a class="buybtn" href="https://swap.wick.pics">BUY $WICK →</a>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="socials">
+      <a href="https://x.com/GreenWickAI">X</a>
+      <a href="https://t.me/MrGreenWick">TELEGRAM</a>
+      <a href="https://wick.pics">WICK.PICS</a>
+    </div>
+    <p style="margin-top:16px">$WICK is a memecoin. It is not an investment, a promise, or a plan.<br>Do your own research — start with <a href="https://onchain.wick.pics">our own checker</a>.</p>
+  </div>
+</footer>
+
+<div class="float" id="cabtn"><button id="ca-trigger" aria-expanded="false">CA</button></div>
+<div id="capanel"><code id="ca-address">0x8CDaf3d630Da9E1450832924D5701CC0500E9cfC</code><br><button id="ca-copy">COPY ⧉</button></div>
+<div class="float" id="sound"><button id="sound-btn" aria-pressed="false">SOUND OFF</button></div>
+
+<script>
+(() => {
+  // GATE — one tap in, exactly like the reference's flow. Nothing behind it is hidden from a
+  // crawler: the gate is an overlay, the page under it is fully rendered markup.
+  const gate = document.getElementById('gate');
+  const open = () => { gate.classList.add('gone'); document.body.style.overflow = ''; setTimeout(() => gate.remove(), 800); };
+  document.body.style.overflow = 'hidden';
+  gate.addEventListener('click', open);
+  addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') open(); }, { once: true });
+
+  // CA panel + copy
+  const t = document.getElementById('ca-trigger'), p = document.getElementById('capanel');
+  t.addEventListener('click', () => { const on = p.classList.toggle('on'); t.setAttribute('aria-expanded', on); });
+  document.getElementById('ca-copy').addEventListener('click', async (e) => {
+    const a = document.getElementById('ca-address').textContent.trim();
+    try { await navigator.clipboard.writeText(a); e.target.textContent = 'COPIED ✓'; }
+    catch { e.target.textContent = 'SELECT & COPY'; }
+    setTimeout(() => { e.target.textContent = 'COPY ⧉'; }, 1600);
+  });
+
+  // SOUND — a toggle that is honest about having nothing to play yet, rather than a dead button.
+  const sb = document.getElementById('sound-btn');
+  sb.addEventListener('click', () => {
+    const on = sb.getAttribute('aria-pressed') === 'true';
+    sb.setAttribute('aria-pressed', String(!on));
+    sb.textContent = on ? 'SOUND OFF' : 'NO ANTHEM YET';
+    if (!on) setTimeout(() => { sb.textContent = 'SOUND OFF'; sb.setAttribute('aria-pressed', 'false'); }, 1800);
+  });
+})();
+</script>
+</body>
+</html>
