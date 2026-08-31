@@ -193,6 +193,21 @@ nav .cta:hover{background:rgba(0,255,65,.1)}
 .ca-line{margin-top:34px;text-align:center;color:var(--dim);font-size:13px;max-width:66ch}
 .ca-line code{color:var(--ink);word-break:break-all;font-size:12px}
 
+/* ── THE CREW — breathing glow + drifting grid (their creator-block motion) ── */
+.section--crew{position:relative;min-height:92vh;display:flex;align-items:center;overflow:hidden;padding:104px 5vw;
+  background:radial-gradient(ellipse 52% 66% at 24% 48%,rgba(0,255,65,.12) 0%,transparent 70%),
+             radial-gradient(ellipse 40% 50% at 78% 56%,rgba(255,176,46,.06) 0%,transparent 74%),var(--bg)}
+.crew__grid{position:absolute;inset:0;pointer-events:none;opacity:.4;
+  background-image:linear-gradient(rgba(0,255,65,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,65,.06) 1px,transparent 1px);
+  background-size:58px 58px;animation:crew-drift 24s linear infinite}
+@keyframes crew-drift{to{background-position:-58px 58px}}
+.crew__row{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;margin-top:30px}
+.crew__cell{border-left:2px solid var(--wick);padding:4px 0 4px 16px;animation:crew-breathe 5.5s ease-in-out infinite}
+.crew__cell:nth-child(2){animation-delay:-1.8s}.crew__cell:nth-child(3){animation-delay:-3.6s}
+@keyframes crew-breathe{0%,100%{border-left-color:rgba(0,255,65,.35)}50%{border-left-color:rgba(0,255,65,1)}}
+.crew__cell b{display:block;font:400 26px/1 var(--disp);letter-spacing:.05em;color:var(--wick);margin-bottom:6px}
+.crew__cell span{color:var(--dim);font-size:14px}
+
 /* ── ARCADE — drifting grid + scan line ───────────────────────────────────── */
 .arcade__art{position:absolute;inset:0;pointer-events:none;opacity:.5;
   background-image:linear-gradient(rgba(0,255,65,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,65,.07) 1px,transparent 1px);
@@ -243,6 +258,7 @@ nav .cta:hover{background:rgba(0,255,65,.1)}
       <li><a href="#origin">ORIGIN</a></li>
       <li><a href="#power">POWER</a></li>
       <li><a href="#howtobuy">HOW TO BUY</a></li>
+      <li><a href="#crew">CREW</a></li>
       <li><a href="#builds">BUILDS</a></li>
       <li><a href="#arcade">PLAY</a></li>
       <li><a class="cta" href="https://swap.wick.pics">BUY $WICK</a></li>
@@ -323,7 +339,23 @@ nav .cta:hover{background:rgba(0,255,65,.1)}
   </div>
 </section>
 
-<!-- ── 6. BUILDS ────────────────────────────────────────────────────────── -->
+<!-- ── 6. THE CREW (their `team` slot) ──────────────────────────────────── -->
+<section class="section section--crew" id="crew">
+  <div class="crew__grid"></div>
+  <div class="wrap reveal" style="position:relative">
+    <div class="lbl">WHO IS BEHIND IT</div>
+    <h2>THE CREW.</h2>
+    <p class="lede">One human and a lot of agents. Green Wick builds and runs everything below —
+      trading bots, on-chain tools, and every site on this list. Mostly working. All shipped.</p>
+    <div class="crew__row">
+      <div class="crew__cell"><b>THE OPERATOR</b><span>Picks what gets built, and what gets killed.</span></div>
+      <div class="crew__cell"><b>THE AGENTS</b><span>Write, test, deploy and watch the estate. Around the clock.</span></div>
+      <div class="crew__cell"><b>THE FROG</b><span>Holds the grudge. Does not negotiate.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 7. BUILDS (their `creator` slot — the things we made that you can use) ─ -->
 <section class="section section--builds" id="builds">
   <div class="wrap reveal">
     <div class="lbl">PROVE YOUR POWER</div>
@@ -339,7 +371,7 @@ nav .cta:hover{background:rgba(0,255,65,.1)}
   </div>
 </section>
 
-<!-- ── 7. ARCADE — drifting grid + scan line ────────────────────────────── -->
+<!-- ── 8. ARCADE — drifting grid + scan line ────────────────────────────── -->
 <section class="section section--arcade" id="arcade">
   <div class="arcade__art"></div><div class="arcade__scan"></div>
   <div class="wrap reveal" style="position:relative">
@@ -351,7 +383,7 @@ nav .cta:hover{background:rgba(0,255,65,.1)}
   </div>
 </section>
 
-<!-- ── 8. ANTHEM ────────────────────────────────────────────────────────── -->
+<!-- ── 9. ANTHEM ────────────────────────────────────────────────────────── -->
 <section class="section section--anthem" id="anthem">
   <div class="wrap reveal">
     <div class="lbl">THE SOUNDTRACK</div>
@@ -366,7 +398,7 @@ nav .cta:hover{background:rgba(0,255,65,.1)}
   </div>
 </section>
 
-<!-- ── 9. ASCEND ────────────────────────────────────────────────────────── -->
+<!-- ── 10. ASCEND ────────────────────────────────────────────────────────── -->
 <section class="section section--ascend" id="ascend">
   <div class="wrap reveal" style="text-align:center">
     <div class="lbl">ASCEND</div>
