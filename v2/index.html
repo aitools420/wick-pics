@@ -73,6 +73,14 @@ h2{font:400 clamp(42px,7.5vw,96px)/.88 var(--disp);letter-spacing:.02em;margin:.
    One canvas, position:fixed, behind every section for the whole scroll.
    Sections ride over it at z-index 2; the hero is transparent.            */
 #wick-canvas{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none;background-color:var(--bg)}
+/* the OPENING STILL (Chef 5048): the page lands on an image, not a hero. A second fixed canvas
+   carries the masked portrait + aura, drawn once (slow glow pulse is CSS, not rAF). Sections
+   with opaque backgrounds slide up OVER it — the reference mechanic. */
+#wick-still{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none;
+  animation:stillbreathe 6.5s ease-in-out infinite alternate}
+@keyframes stillbreathe{from{filter:drop-shadow(0 0 34px rgba(57,255,20,.16)) brightness(1)}
+  to{filter:drop-shadow(0 0 64px rgba(57,255,20,.34)) brightness(1.07)}}
+@media (prefers-reduced-motion:reduce){#wick-still{animation:none}}
 #wick-veil{position:fixed;inset:0;z-index:1;pointer-events:none;
   background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(0,255,65,.10) 0%,transparent 62%),
              radial-gradient(ellipse 60% 40% at 80% 90%,rgba(255,176,46,.06) 0%,transparent 70%)}
@@ -169,7 +177,7 @@ header::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:no
 .section--hero a,.section--hero button{pointer-events:all}
 .hero__scrim{position:absolute;inset:0;z-index:2;pointer-events:none;
   background:linear-gradient(to right,var(--bg) 0%,rgba(5,7,5,.82) 18%,rgba(5,7,5,.42) 38%,transparent 58%)}
-.hero__vignette{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:.5;
+.hero__vignette{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:.28;
   background:radial-gradient(ellipse at 68% 50%,transparent 28%,rgba(5,7,5,.6) 100%)}
 .hero__content{position:absolute;top:50%;left:5vw;transform:translateY(-50%);z-index:3;
   display:flex;flex-direction:column;align-items:flex-start;gap:24px;max-width:46vw}
@@ -177,6 +185,8 @@ header::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:no
   background:linear-gradient(90deg,var(--wick) 0%,#9dffb4 52%,var(--gold) 100%);
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:var(--wick);
   animation:eyebrow 3.4s ease-in-out infinite}
+.hero__eyebrow--lone{font-size:clamp(15px,1.6vw,24px);letter-spacing:.42em;color:#d9ffd2;
+  text-shadow:0 0 18px rgba(57,255,20,.75),0 0 46px rgba(57,255,20,.35)}
 @keyframes eyebrow{0%,100%{opacity:.55}50%{opacity:1}}
 .hero__lines{display:flex;flex-direction:column}
 .hero__linewrap{overflow:hidden;line-height:.85}
@@ -225,8 +235,9 @@ header::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:no
 
 /* 3 · INFLECTION — the parallax break */
 .section--inflection{position:relative;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;
-  background-image:linear-gradient(rgba(5,7,5,.74),rgba(5,7,5,.88)),url('wick.png');
-  background-size:cover;background-position:center;background-attachment:fixed}
+  background-image:linear-gradient(rgba(5,7,5,.55),rgba(5,7,5,.78)),url('wick.png');
+  /* macro crop = the second reveal reads as a DIFFERENT image (eyes region) until Chef's art lands */
+  background-size:340%;background-position:50% 33%;background-attachment:fixed}
 .inflection__overlay{position:absolute;inset:0;pointer-events:none;
   background:radial-gradient(ellipse 60% 60% at 50% 50%,transparent 20%,rgba(5,7,5,.72) 100%)}
 .inflection__flash{position:absolute;inset:0;pointer-events:none;opacity:0;
@@ -478,6 +489,7 @@ header::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:no
 .builds__slot b{display:block;font:400 clamp(26px,4vw,42px)/1 var(--disp);letter-spacing:.08em;color:var(--wick);
   text-shadow:0 0 26px rgba(0,255,65,.4)}
 .builds__slot span{display:block;margin-top:8px;font:500 10px/1.6 var(--mono);letter-spacing:.16em;color:var(--dim)}
+.builds__forge{width:100%;height:clamp(380px,52vh,560px);border:0;display:block;background:#04120a}
 .builds__foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .builds__foot em{font:500 10px/1 var(--mono);font-style:normal;letter-spacing:.14em;color:rgba(233,255,233,.45)}
 .builds__list{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;list-style:none}
@@ -675,6 +687,7 @@ header::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:no
 
 <!-- ── THE FIXED PANE — one layer behind the whole scroll ─────────────────── -->
 <canvas id="wick-canvas"></canvas>
+<canvas id="wick-still" aria-hidden="true"></canvas>
 <div id="wick-veil"></div>
 
 <!-- ── FIXED FURNITURE ────────────────────────────────────────────────────── -->
@@ -730,20 +743,9 @@ header::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:no
 
 <!-- ══ 1 · HERO ═══════════════════════════════════════════════════════════ -->
 <section class="section section--hero" id="hero">
-  <div class="hero__scrim"></div>
   <div class="hero__vignette"></div>
   <div class="hero__content">
-    <div class="hero__eyebrow">NEVER KILL A FROG'S DOG</div>
-    <div class="hero__lines">
-      <div class="hero__linewrap"><span class="hero__line">LIGHT THE</span></div>
-      <div class="hero__linewrap"><span class="hero__line hero__line--wick">WICK</span></div>
-    </div>
-    <p class="lede hero__lede">A frog with a gun and a grudge — and behind him, an AI company that actually ships.
-      $WICK on PulseChain: games, tools and live products, built in the open.</p>
-    <div class="hero__cta">
-      <a class="btn" href="#" data-buy>BUY $WICK →</a>
-      <a class="btn btn--ghost" href="#origin">THE STORY</a>
-    </div>
+    <div class="hero__eyebrow hero__eyebrow--lone">NEVER KILL A FROG'S DOG</div>
   </div>
 </section>
 
@@ -758,7 +760,10 @@ header::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:no
       <p class="lede rv" style="--i:3">$WICK is the ticker for that grudge — and the front door to everything
         Green Wick builds: autonomous agents, on-chain tools, and games you can actually play.
         Mostly working. All shipped.</p>
-      <p class="rv" style="--i:4;margin-top:26px"><a class="btn btn--ghost" href="#power">THE NUMBERS →</a></p>
+      <p class="lede rv" style="--i:4">A frog with a gun and a grudge — and behind him, an AI company that actually ships.
+        $WICK on PulseChain: games, tools and live products, built in the open.</p>
+      <p class="rv" style="--i:5;margin-top:26px"><a class="btn" href="#" data-buy>BUY $WICK →</a>
+        <a class="btn btn--ghost" href="#power" style="margin-left:10px">THE NUMBERS →</a></p>
     </div>
     <div class="origin__art"><canvas id="origin-particles" aria-hidden="true"></canvas></div>
   </div>
@@ -869,8 +874,8 @@ header::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:no
     <div class="builds__intro">
       <span class="lbl rv" style="--i:0">PROVE YOUR POWER</span>
       <h2 class="rv" style="--i:1">WHAT WE'VE<br>SHIPPED.</h2>
-      <p class="lede rv" style="--i:2">Forty-odd live sites, and every one of them is something you can open right now.
-        The console beside this is running through them.</p>
+      <p class="lede rv" style="--i:2">Forty-odd live sites you can open right now — and beside this, the RING FORGE:
+        put the $WICK ring on your PFP. Nothing repainted, nothing AI-mangled. Your face, our ring.</p>
       <ul class="builds__list rv" style="--i:3">
         <li><a href="https://games.wick.pics">games.wick.pics</a></li>
         <li><a href="https://onchain.wick.pics">onchain.wick.pics</a></li>
@@ -881,20 +886,15 @@ header::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:no
       </ul>
     </div>
     <div class="builds__panel rv" style="--i:2">
-      <div class="builds__bar"><i></i><i></i><i></i><span>GREEN WICK // ESTATE</span></div>
-      <div class="builds__prompt">
-        <em>NOW SERVING</em>
-        <p id="buildsPrompt"></p>
-      </div>
-      <div class="builds__console">
-        <div class="builds__slot">
-          <b id="buildsName">THE ARCADE</b>
-          <span id="buildsNote">games.wick.pics</span>
-        </div>
-      </div>
+      <div class="builds__bar"><i></i><i></i><i></i><span>GREEN WICK // RING FORGE</span></div>
+      <!-- Chef 5048: the reference's creator slot runs an AI PFP generator; ours runs the RING
+           FORGE — no live AI, nobody's PFP gets repainted, the ring goes ON. pfp.wick.pics
+           embeds clean (no frame-blocking headers, checked 09-01). -->
+      <iframe class="builds__forge" src="https://pfp.wick.pics" title="$WICK ring forge — put the ring on your PFP"
+        loading="lazy" referrerpolicy="no-referrer"></iframe>
       <div class="builds__foot">
-        <em>6 OF 40+ SHOWN</em>
-        <a class="btn btn--ghost" href="https://sites.wick.pics" style="padding:9px 14px">THE ESTATE →</a>
+        <em>YOUR PFP STAYS YOURS — THE RING GOES ON</em>
+        <a class="btn btn--ghost" href="https://pfp.wick.pics" target="_blank" rel="noopener" style="padding:9px 14px">OPEN FULL FORGE →</a>
       </div>
     </div>
   </div>
@@ -1321,6 +1321,35 @@ function embers(canvas,opts){
   }
 }
 embers('wick-canvas',{});
+// ── THE OPENING STILL (Chef 5048): masked portrait apparition, right-of-centre, drawn once.
+(function(){
+  var c=document.getElementById('wick-still'); if(!c) return;
+  var img=new Image(); img.src='wick.png';
+  function draw(){
+    var dpr=Math.min(2,window.devicePixelRatio||1), W=window.innerWidth, H=window.innerHeight;
+    c.width=W*dpr; c.height=H*dpr; c.style.width=W+'px'; c.style.height=H+'px';
+    var x=c.getContext('2d'); x.setTransform(dpr,0,0,dpr,0,0); x.clearRect(0,0,W,H);
+    if(!img.naturalWidth) return;
+    var mobile=W<720;
+    var size=mobile? Math.min(W*1.15,H*.62) : Math.min(H*.92,W*.52);
+    var cx=mobile? W*.5 : W*.68, cy=mobile? H*.4 : H*.52;
+    // aura first — the reference's glow field
+    var aura=x.createRadialGradient(cx,cy,size*.1,cx,cy,size*.85);
+    aura.addColorStop(0,'rgba(57,255,20,.30)'); aura.addColorStop(.45,'rgba(30,160,40,.14)');
+    aura.addColorStop(1,'rgba(0,0,0,0)');
+    x.fillStyle=aura; x.fillRect(0,0,W,H);
+    // masked portrait: square art feathered to nothing so it reads as an apparition, not a box
+    var o=document.createElement('canvas'); o.width=o.height=1024;
+    var ox=o.getContext('2d'); ox.drawImage(img,0,0,1024,1024);
+    var m=ox.createRadialGradient(512,470,180,512,470,540);
+    m.addColorStop(0,'rgba(0,0,0,1)'); m.addColorStop(.55,'rgba(0,0,0,.85)'); m.addColorStop(.85,'rgba(0,0,0,.3)'); m.addColorStop(1,'rgba(0,0,0,0)');
+    ox.globalCompositeOperation='destination-in'; ox.fillStyle=m; ox.fillRect(0,0,1024,1024);
+    x.drawImage(o,cx-size/2,cy-size/2,size,size);
+  }
+  img.onload=draw; var rT=null;
+  window.addEventListener('resize',function(){ clearTimeout(rT); rT=setTimeout(draw,180); });
+  if(img.complete) draw();
+})();
 embers('origin-particles',{fill:true,max:44,density:14});
 })();
 </script>
