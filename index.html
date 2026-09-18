@@ -638,8 +638,15 @@
           ticker.textContent = '$WICK: No data';
           return;
         }
-        // Pick highest liquidity
-        const best = pulse.sort((a,b) => (b.liquidity?.usd||0) - (a.liquidity?.usd||0))[0];
+        // Pick highest 24h VOLUME, tie-broken by liquidity (Chef 2026-09-18).
+        // Was highest LIQUIDITY — and on 2026-09-18 that chose a 9mm pair with $5,142 liquidity and
+        // literally $0.00 traded in 24h, while the pair actually being traded (PulseX 0xb2406c1E…,
+        // $36/24h) sat third and never won. Deepest pool ≠ where anyone is trading.
+        // ⚠️ The liquidity tiebreak matters: on a genuinely quiet day every volume is 0, and sorting
+        // by an all-zero key would hand the button to whichever pair the API happened to list first.
+        const best = pulse.sort((a,b) =>
+          ((b.volume?.h24||0) - (a.volume?.h24||0)) || ((b.liquidity?.usd||0) - (a.liquidity?.usd||0))
+        )[0];
         const price = best.priceUsd;
         const change = best.priceChange?.h24;
         const mc = best.marketCap;
