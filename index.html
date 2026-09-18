@@ -655,7 +655,15 @@
         ticker.href = best.url || ('https://dexscreener.com/pulsechain/' + best.pairAddress);
         const ch = change?.toFixed(2) || 0;
         const chColor = parseFloat(ch) < 0 ? '#f85149' : 'lime';
-        ticker.innerHTML = `$${parseFloat(price).toPrecision(2)} | <span style="white-space:nowrap;color:${chColor}">24h: ${ch}%</span> | <span style="white-space:nowrap">MC:&nbsp;$${mc?.toLocaleString() || 'N/A'}</span>`;
+        // 24h volume across EVERY pulsechain pair, not just the one linked (Chef 2026-09-18).
+        // Deliberate: the button already mixes levels — price and 24h% are the SELECTED pair, MC is
+        // the whole token — so a token-wide volume belongs beside MC and answers "how much WICK
+        // actually traded", which one pair cannot. 10 of 18 pairs carried any volume the day this
+        // shipped, so the single-pair figure understates it by roughly a third.
+        const vol24 = pulse.reduce((sum, p) => sum + (p.volume?.h24 || 0), 0);
+        // Chef's bands (TG 10047): under 100 red · 100-500 orange · over 500 green.
+        const volColor = vol24 < 100 ? '#f85149' : vol24 <= 500 ? '#ffa657' : 'lime';
+        ticker.innerHTML = `$${parseFloat(price).toPrecision(2)} | <span style="white-space:nowrap;color:${chColor}">24h: ${ch}%</span> | <span style="white-space:nowrap;color:${volColor}">Vol:&nbsp;$${Math.round(vol24).toLocaleString()}</span> | <span style="white-space:nowrap">MC:&nbsp;$${mc?.toLocaleString() || 'N/A'}</span>`;
       } catch (e) {
         ticker.textContent = '$WICK: Unavailable';
       }
