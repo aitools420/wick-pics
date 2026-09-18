@@ -663,7 +663,7 @@
         const vol24 = pulse.reduce((sum, p) => sum + (p.volume?.h24 || 0), 0);
         // Chef's bands (TG 10047): under 100 red · 100-500 orange · over 500 green.
         const volColor = vol24 < 100 ? '#f85149' : vol24 <= 500 ? '#ffa657' : 'lime';
-        ticker.innerHTML = `$${parseFloat(price).toPrecision(2)} | <span style="white-space:nowrap;color:${chColor}">24h: ${ch}%</span> | <span style="white-space:nowrap;color:${volColor}">Vol:&nbsp;$${Math.round(vol24).toLocaleString()}</span> | <span style="white-space:nowrap">MC:&nbsp;$${mc?.toLocaleString() || 'N/A'}</span>`;
+        ticker.innerHTML = `$${parseFloat(price).toPrecision(2)} | <span style="white-space:nowrap;color:${chColor}">24h:${ch}%</span> | <span style="white-space:nowrap;color:${volColor}">Vol:$${Math.round(vol24).toLocaleString()}</span> | <span style="white-space:nowrap">MC:$${mc?.toLocaleString() || 'N/A'}</span>`;
       } catch (e) {
         ticker.textContent = '$WICK: Unavailable';
       }
