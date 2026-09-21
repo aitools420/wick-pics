@@ -638,13 +638,24 @@
           ticker.textContent = '$WICK: No data';
           return;
         }
+        // ⛔ PRICE, 24h% AND MC ONLY EVER COME FROM A PAIR WHERE WICK IS THE **BASE** TOKEN (Chef 2026-09-21).
+        // /dex/tokens/<ca> returns every pair with WICK on EITHER side, and priceUsd / priceChange /
+        // marketCap always describe the BASE token. A 9mm WARTIME/WICK pool (base=WARTIME) took the top
+        // 24h volume that morning, so the button showed WARTIME's $0.00033 and WARTIME's $320k market cap
+        // under a "$WICK price" label, and the click landed on WARTIME's chart. The LP table below already
+        // drew this base/quote distinction (`wickIsBase`); the ticker never did.
+        const wickBase = pulse.filter(p => p.baseToken?.address?.toLowerCase() === ca);
+        if (wickBase.length === 0) {
+          ticker.textContent = '$WICK: No data';
+          return;
+        }
         // Pick highest 24h VOLUME, tie-broken by liquidity (Chef 2026-09-18).
         // Was highest LIQUIDITY — and on 2026-09-18 that chose a 9mm pair with $5,142 liquidity and
         // literally $0.00 traded in 24h, while the pair actually being traded (PulseX 0xb2406c1E…,
         // $36/24h) sat third and never won. Deepest pool ≠ where anyone is trading.
         // ⚠️ The liquidity tiebreak matters: on a genuinely quiet day every volume is 0, and sorting
         // by an all-zero key would hand the button to whichever pair the API happened to list first.
-        const best = pulse.sort((a,b) =>
+        const best = wickBase.sort((a,b) =>
           ((b.volume?.h24||0) - (a.volume?.h24||0)) || ((b.liquidity?.usd||0) - (a.liquidity?.usd||0))
         )[0];
         const price = best.priceUsd;
@@ -660,6 +671,9 @@
         // the whole token — so a token-wide volume belongs beside MC and answers "how much WICK
         // actually traded", which one pair cannot. 10 of 18 pairs carried any volume the day this
         // shipped, so the single-pair figure understates it by roughly a third.
+        // Deliberately still over `pulse`, not `wickBase`: a trade in a WARTIME/WICK pool is still WICK
+        // changing hands, so it belongs in "how much WICK actually traded". Only the PRICE side needed
+        // the base filter above.
         const vol24 = pulse.reduce((sum, p) => sum + (p.volume?.h24 || 0), 0);
         // Chef's bands (TG 10047): under 100 red · 100-500 orange · over 500 green.
         const volColor = vol24 < 100 ? '#f85149' : vol24 <= 500 ? '#ffa657' : 'lime';
