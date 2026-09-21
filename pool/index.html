@@ -126,6 +126,18 @@ function wantedSlug() {
 
   const other = partnerOf(p);
   const wickIsBase = (p.baseToken || {}).address?.toLowerCase() === WICK;
+  // ⛔ priceUsd AND priceNative BOTH DESCRIBE THE PAIR'S **BASE** TOKEN (2026-09-21).
+  // On a pool where WICK is the QUOTE — WARTIME/WICK, KJP/WICK, EROS/WICK all exist — printing
+  // p.priceUsd under "WICK price here" prints the PARTNER's price. The front-page ticker shipped
+  // exactly that bug this morning. priceNative is the base priced in the quote, so WICK's own USD
+  // price is priceUsd / priceNative, and WICK priced in the partner is its reciprocal.
+  // A dead pair can carry priceNative with priceUsd missing entirely (EROS/WICK), hence the guards.
+  const wickUsd = wickIsBase
+    ? (p.priceUsd != null ? Number(p.priceUsd) : null)
+    : (p.priceUsd != null && Number(p.priceNative) ? Number(p.priceUsd) / Number(p.priceNative) : null);
+  const wickNative = wickIsBase
+    ? (p.priceNative != null ? Number(p.priceNative) : null)
+    : (Number(p.priceNative) ? 1 / Number(p.priceNative) : null);
   const liq = p.liquidity || {}, vol = p.volume || {}, chg = p.priceChange || {}, tx = p.txns || {};
   const wickAmt = wickIsBase ? liq.base : liq.quote;
   const otherAmt = wickIsBase ? liq.quote : liq.base;
@@ -145,7 +157,7 @@ function wantedSlug() {
       + row('Total liquidity', usd(liq.usd))
       + row('WICK side', qty(wickAmt) + ' <span style="color:#666;font-size:.7em">WICK</span>')
       + row(esc(other.symbol || '?') + ' side', qty(otherAmt) + ' <span style="color:#666;font-size:.7em">' + esc(other.symbol || '') + '</span>')
-      + row('WICK price here', p.priceUsd ? '$' + Number(p.priceUsd).toPrecision(4) : '—', p.priceNative ? Number(p.priceNative).toPrecision(4) + ' ' + esc(other.symbol || '') : '')
+      + row('WICK price here', wickUsd ? '$' + wickUsd.toPrecision(4) : '—', wickNative ? wickNative.toPrecision(4) + ' ' + esc(other.symbol || '') : '')
     + '</div></div>'
 
     + '<div class="card"><h2>WHAT IS MOVING THROUGH IT</h2>'
