@@ -765,6 +765,28 @@
       } catch (e) { return null; }
     }
 
+    // DexScreener lists some WICK pools with NO dollar value: it has no price for the partner token (KJP, PEPE, KELO, OG and the
+    // WETH pair on 10 Oct 2026), and drawPools skips anything under $1 as dead, so those pools vanished from this table.
+    // lp.wick.pics reads every pool on-chain (WICK side + partner side at the pool's own price; within ~2 % of DexScreener where
+    // both have a value), so for those pairs only, its reading fills the gap (Chef Y TG 18498). A slow or failed read changes nothing.
+    async function fillFromChain(pairs) {
+      const missing = pairs.filter(p => !(p.liquidity && p.liquidity.usd >= 1));
+      if (!missing.length) return;
+      try {
+        const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 8000);
+        const r = await fetch('https://lp.wick.pics/api/pools', { signal: ctl.signal });
+        clearTimeout(t);
+        const lp = await r.json();
+        const by = new Map((lp.pools || []).map(q => [String(q.address || '').toLowerCase(), q]));
+        for (const p of missing) {
+          const q = by.get(String(p.pairAddress || '').toLowerCase());
+          if (!q || !(q.usdLiquidity >= 1)) continue;
+          const wickIsBase = (p.baseToken?.address || '').toLowerCase() === WICK_CA;
+          p.liquidity = { usd: q.usdLiquidity, base: wickIsBase ? q.baseAmount : q.quoteAmount, quote: wickIsBase ? q.quoteAmount : q.baseAmount };
+        }
+      } catch (e) { console.warn('lp.wick.pics fill skipped:', e); }
+    }
+
     async function updatePools() {
       const cached = cachedPools();
       if (cached) drawPools(cached.pairs);               // paint the last good answer first
@@ -774,6 +796,7 @@
         const data = await resp.json();
         const pairs = (data.pairs || []).filter(p => p.chainId === 'pulsechain');
         if (pairs.length === 0) return;                  // keep whatever is on screen
+        await fillFromChain(pairs);                      // pools DexScreener gives no dollar value (Chef TG 18498)
         try { localStorage.setItem(LP_CACHE, JSON.stringify({at: Date.now(), pairs: pairs})); } catch (e) {}
         drawPools(pairs);
       } catch (e) {
